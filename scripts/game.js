@@ -116,6 +116,216 @@ Game.UI.padModeStatus = 1
 Game.UI.padModeMessage = 0
 Game.UI.padMessageDungeon = 1
 
+Game.UI.status = new Game.UI(15, null)
+Game.UI.status._height = Game.UI.canvas.getHeight() - Game.UI.padTopBottom * 2
+Game.UI.status._x = Game.UI.canvas.getWidth() -
+  Game.UI.padLeftRight - Game.UI.status.getWidth()
+Game.UI.status._y = Game.UI.padTopBottom
+
+Game.UI.modeline = new Game.UI(null, 1)
+Game.UI.modeline._width = Game.UI.canvas.getWidth() - Game.UI.padLeftRight * 2 -
+  Game.UI.padModeStatus - Game.UI.status.getWidth()
+Game.UI.modeline._x = Game.UI.padLeftRight
+Game.UI.modeline._y = Game.UI.canvas.getHeight() - Game.UI.padTopBottom -
+  Game.UI.modeline.getHeight()
+
+Game.UI.message = new Game.UI(Game.UI.modeline.getWidth(), 5)
+Game.UI.message._x = Game.UI.modeline.getX()
+Game.UI.message._y = Game.UI.modeline.getY() - Game.UI.padModeMessage -
+  Game.UI.message.getHeight()
+
+Game.UI.dungeon = new Game.UI(Game.UI.modeline.getWidth(), null)
+Game.UI.dungeon._height = Game.UI.canvas.getHeight() - Game.UI.padTopBottom -
+  Game.UI.modeline.getHeight() - Game.UI.padModeMessage -
+  Game.UI.message.getHeight() - Game.UI.padMessageDungeon
+// the dungeon size should be an integer
+Game.UI.dungeon._height = Math.floor(Game.UI.dungeon._height)
+Game.UI.dungeon._x = Game.UI.padLeftRight
+Game.UI.dungeon._y = Game.UI.padTopBottom
+
+// ``` UI blocks +++
+Game.UI.bundern = new Game.UI(Game.UI.status.getWidth(), 2)
+Game.UI.bundern._x = Game.UI.status.getX()
+Game.UI.bundern._y = Game.UI.status.getY() + 2
+
+Game.UI.altar = new Game.UI(Game.UI.status.getWidth(), 1)
+Game.UI.altar._x = Game.UI.status.getX()
+Game.UI.altar._y = Game.UI.bundern.getY() + Game.UI.bundern.getHeight() + 1
+
+Game.UI.treasure = new Game.UI(Game.UI.status.getWidth(), 4)
+Game.UI.treasure._x = Game.UI.status.getX()
+Game.UI.treasure._y = Game.UI.altar.getY() + Game.UI.altar.getHeight() + 1
+
+// ----- Screen factory: display content, listen keyboard events +++++
+Game.Screen = function (name, mode) {
+  this._name = name || 'Unnamed Screen'
+  this._mode = mode || 'main'
+  this._modeLineText = ''
+}
+
+Game.Screen.prototype.getName = function () { return this._name }
+Game.Screen.prototype.getMode = function () { return this._mode }
+Game.Screen.prototype.getText = function () { return this._modeLineText }
+
+Game.Screen.prototype.setMode = function (mode, text) {
+  this._mode = mode || 'main'
+  this._modeLineText = Game.text.modeLine(this._mode) + (text || '')
+}
+
+Game.Screen.prototype.enter = function () {
+  Game.screens._currentName = this.getName()
+  Game.screens._currentMode = this.getMode()
+
+  this.initialize(this.getName())
+  this.display()
+}
+
+Game.Screen.prototype.exit = function () {
+  Game.screens._currentName = null
+  Game.screens._currentMode = null
+
+  Game.display.clear()
+}
+
+Game.Screen.prototype.initialize = function (name) {
+  Game.getDevelop() && console.log('Enter screen: ' + name + '.')
+}
+
+Game.Screen.prototype.display = function () {
+  Game.display.drawText(1, 1, 'Testing screen')
+  Game.display.drawText(1, 2, 'Name: ' + Game.screens._currentName)
+  Game.display.drawText(1, 3, 'Mode: ' + Game.screens._currentMode)
+}
+
+Game.Screen.prototype.keyInput = function (e) {
+  Game.getDevelop() && console.log('Key pressed: ' + e.key)
+}
+
+// ----- In-game screens & helper functions +++++
+Game.screens = {}
+Game.screens._currentName = null
+Game.screens._currentMode = null
+
+// ``` Helper functions +++
+Game.screens.colorfulText = function (text, fgColor, bgColor) {
+  return bgColor
+    ? '%c{' + Game.getColor(fgColor) + '}%b{' +
+    Game.getColor(bgColor) + '}' + text + '%b{}%c{}'
+    : '%c{' + Game.getColor(fgColor) + '}' + text + '%c{}'
+}
+
+Game.screens.drawAlignRight = function (x, y, width, text, color) {
+  Game.display.drawText(x + width - text.length, y,
+    color ? Game.screens.colorfulText(text, color) : text)
+}
+
+Game.screens.drawBorder = function () {
+  let status = Game.UI.status
+  let dungeon = Game.UI.dungeon
+
+  for (let i = status.getY(); i < status.getHeight(); i++) {
+    Game.display.draw(status.getX() - 1, i, '|')
+  }
+  for (let i = dungeon.getX(); i < dungeon.getWidth() + 1; i++) {
+    Game.display.draw(i, dungeon.getY() + dungeon.getHeight(), '-')
+  }
+}
+
+Game.screens.drawVersion = function () {
+  let version = Game.getVersion()
+
+  Game.getDevelop() && (version = 'Wiz|' + version)
+  Game.screens.drawAlignRight(Game.UI.status.getX(), Game.UI.status.getY(),
+    Game.UI.status.getWidth(), version, 'grey')
+}
+
+Game.screens.drawStatus = function () {
+  let speed = 2
+  let bundern = 5
+  let altar = 'Death'
+
+  let hasSkull = 3
+  let hasCoin = 1
+  let hasGem = 0
+  let hasRune = 3
+
+  let needSkull = 1
+  let needCoin = 2
+  let needGem = 3
+  let needRune = 3
+
+  let skullColor = changeColor(hasSkull, needSkull)
+  let coinColor = changeColor(hasCoin, needCoin)
+  let gemColor = changeColor(hasGem, needGem)
+  let runeColor = changeColor(hasRune, needRune)
+
+  let alignBdn = 9
+  let alignAlt = 7
+
+  let x = Game.UI.status.getX()
+  let yBdn = Game.UI.bundern.getY()
+  let yAlt = Game.UI.altar.getY()
+  let yTrs = Game.UI.treasure.getY()
+
+  Game.display.drawText(x, yBdn, Game.text.ui('turn'))
+  Game.display.drawText(x, yBdn + 1, Game.text.ui('bundern'))
+  Game.display.drawText(x + alignBdn, yBdn, speed.toString())
+  Game.display.drawText(x + alignBdn, yBdn + 1, bundern.toString())
+
+  Game.display.drawText(x, yAlt, Game.text.ui('altar'))
+  Game.display.drawText(x + alignAlt, yAlt, altar)
+
+  Game.display.drawText(x, yTrs, Game.text.ui('skull'))
+  Game.display.drawText(x + alignAlt, yTrs,
+    Game.screens.colorfulText(hasSkull + '/' + needSkull, skullColor))
+
+  Game.display.drawText(x, yTrs + 1, Game.text.ui('coin'))
+  Game.display.drawText(x + alignAlt, yTrs + 1,
+    Game.screens.colorfulText(hasCoin + '/' + needCoin, coinColor))
+
+  Game.display.drawText(x, yTrs + 2, Game.text.ui('gem'))
+  Game.display.drawText(x + alignAlt, yTrs + 2,
+    Game.screens.colorfulText(hasGem + '/' + needGem, gemColor))
+
+  Game.display.drawText(x, yTrs + 3, Game.text.ui('rune'))
+  Game.display.drawText(x + alignAlt, yTrs + 3,
+    Game.screens.colorfulText(hasRune + '/' + needRune, runeColor))
+
+  function changeColor (hasItem, requireItem) {
+    return hasItem >= requireItem ? 'orange' : 'white'
+  }
+}
+
+Game.screens.drawSeed = function () {
+  let seed = Game.entities.get('seed').Seed.getRawSeed()
+  seed = seed.replace(/^(#{0,1}\d{5})(\d{5})$/, '$1-$2')
+
+  Game.screens.drawAlignRight(
+    Game.UI.status.getX(),
+    Game.UI.status.getY() + Game.UI.status.getHeight() - 1,
+    Game.UI.status.getWidth(),
+    seed, 'grey')
+}
+
+Game.screens.drawModeLine = function (text) {
+  Game.display.drawText(Game.UI.modeline.getX(), Game.UI.modeline.getY(), text)
+}
+
+// ``` In-game screens +++
+Game.screens.main = new Game.Screen('main')
+
+Game.screens.main.initialize = function () {
+  console.log(Game.UI.dungeon.getWidth())
+  console.log(Game.UI.dungeon.getHeight())
+}
+
+Game.screens.main.display = function () {
+  Game.display.drawText(1, 1, 'hello world')
+  Game.screens.drawBorder()
+  Game.screens.drawVersion()
+  Game.screens.drawStatus()
+}
+
 // ----- Initialization +++++
 window.onload = function () {
   if (!ROT.isSupported()) {
@@ -124,7 +334,6 @@ window.onload = function () {
   }
   document.getElementById('game').appendChild(Game.display.getContainer())
 
-  Game.display.drawText(1, 1, 'hello world')
-  // Game.display.clear()
-  // Game.screens.main.enter()
+  Game.display.clear()
+  Game.screens.main.enter()
 }
