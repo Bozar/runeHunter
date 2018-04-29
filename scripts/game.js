@@ -2,7 +2,7 @@
 
 // ----- Version number, development switch, seed & color +++++
 var Game = {}
-Game._version = '0.0.1-dev'
+Game._version = '0.0.1-?'
 Game._develop = true
 Game.getVersion = function () { return this._version }
 Game.getDevelop = function () { return this._develop }
@@ -45,9 +45,9 @@ Game.input.keybind.get('move').set('right', ['l', 'ArrowRight'])
 
 // drop treasure
 Game.input.keybind.set('drop', new Map())
-Game.input.keybind.get('drop').set('skull', ['s'])
-Game.input.keybind.get('drop').set('coin', ['c'])
-Game.input.keybind.get('drop').set('gem', ['g'])
+Game.input.keybind.get('drop').set('skull', ['s', '1'])
+Game.input.keybind.get('drop').set('coin', ['c', '2'])
+Game.input.keybind.get('drop').set('gem', ['g', '3'])
 
 Game.input.getAction = function (keyInput, mode) {
   if (!mode) {
@@ -116,7 +116,7 @@ Game.UI.padModeStatus = 1
 Game.UI.padModeMessage = 0
 Game.UI.padMessageDungeon = 1
 
-Game.UI.status = new Game.UI(15, null)
+Game.UI.status = new Game.UI(13, null)
 Game.UI.status._height = Game.UI.canvas.getHeight() - Game.UI.padTopBottom * 2
 Game.UI.status._x = Game.UI.canvas.getWidth() -
   Game.UI.padLeftRight - Game.UI.status.getWidth()
@@ -252,15 +252,20 @@ Game.screens.drawStatus = function () {
   let needSkull = 1
   let needCoin = 2
   let needGem = 3
-  let needRune = 3
 
-  let skullColor = changeColor(hasSkull, needSkull)
-  let coinColor = changeColor(hasCoin, needCoin)
-  let gemColor = changeColor(hasGem, needGem)
-  let runeColor = changeColor(hasRune, needRune)
+  let hasList = [hasSkull, hasCoin, hasGem, hasRune]
+  let needList = [needSkull, needCoin, needGem]
+
+  let uiList = [Game.text.ui('skull'), Game.text.ui('coin'),
+    Game.text.ui('gem'), Game.text.ui('rune')]
+
+  let colorList = []
+  for (let i = 0; i < needList.length; i++) {
+    colorList.push(hasList[i] > needList[i] ? 'orange' : 'white')
+  }
+  colorList.push(null)
 
   let align = 7
-
   let x = Game.UI.status.getX()
   let yTrn = Game.UI.turn.getY()
   let yAlt = Game.UI.altar.getY()
@@ -274,29 +279,16 @@ Game.screens.drawStatus = function () {
   Game.display.drawText(x, yAlt, Game.text.ui('altar'))
   Game.display.drawText(x + align, yAlt, altar)
 
-  Game.display.drawText(x, yTrs, Game.text.ui('skull'))
-  Game.display.drawText(x + align, yTrs,
-    Game.screens.colorfulText(hasSkull + '/' + needSkull, skullColor))
-
-  Game.display.drawText(x, yTrs + 1, Game.text.ui('coin'))
-  Game.display.drawText(x + align, yTrs + 1,
-    Game.screens.colorfulText(hasCoin + '/' + needCoin, coinColor))
-
-  Game.display.drawText(x, yTrs + 2, Game.text.ui('gem'))
-  Game.display.drawText(x + align, yTrs + 2,
-    Game.screens.colorfulText(hasGem + '/' + needGem, gemColor))
-
-  Game.display.drawText(x, yTrs + 3, Game.text.ui('rune'))
-  Game.display.drawText(x + align, yTrs + 3,
-    Game.screens.colorfulText(hasRune + '/' + needRune, runeColor))
-
-  function changeColor (hasItem, requireItem) {
-    return hasItem >= requireItem ? 'orange' : 'white'
+  for (let i = 0; i < hasList.length; i++) {
+    Game.display.drawText(x, yTrs + i, uiList[i])
+    Game.display.drawText(x + align, yTrs + i,
+      Game.screens.colorfulText(hasList[i] + (i < 3 ? '/' + needList[i] : ''),
+        colorList[i]))
   }
 }
 
 Game.screens.drawSeed = function () {
-  let seed = Game.entities.get('seed').Seed.getRawSeed()
+  let seed = Game.getEntity('seed').Seed.getRawSeed()
   seed = seed.replace(/^(#{0,1}\d{5})(\d{5})$/, '$1-$2')
 
   Game.screens.drawAlignRight(
@@ -312,7 +304,7 @@ Game.screens.drawModeLine = function (text) {
 
 // the text cannot be longer than the width of message block
 Game.screens.drawMessage = function (text) {
-  let msgList = []
+  let msgList = Game.getEntity('message').Message.getMsgList()
   let x = Game.UI.message.getX()
   let y = Game.UI.message.getY()
 
@@ -322,6 +314,7 @@ Game.screens.drawMessage = function (text) {
   }
   y += Game.UI.message.getHeight() - msgList.length
 
+  Game.display.clear()
   for (let i = 0; i < msgList.length; i++) {
     Game.display.drawText(x, y + i, msgList[i])
   }
@@ -331,15 +324,26 @@ Game.screens.drawMessage = function (text) {
 Game.screens.main = new Game.Screen('main')
 
 Game.screens.main.initialize = function () {
-  console.log(Game.UI.dungeon.getWidth())
-  console.log(Game.UI.dungeon.getHeight())
+  Game.entity.seed()
+  Game.getEntity('seed').Seed.setSeed(Game.getDevSeed())
+  Game.entity.message()
+
+  Game.screens.drawMessage('hello world')
+  Game.screens.drawMessage('welcome to the dungeon')
+  Game.screens.drawMessage('You cannot drop the treasure here.')
+  Game.screens.drawMessage('You drop the Alluring Skull.')
+  Game.screens.drawMessage('You drop the Red Stone of Aja.')
+  Game.screens.drawMessage('You pick up the Red Stone of Aja.')
+  Game.screens.drawMessage('You find the Double-Headed Coin.')
 }
 
 Game.screens.main.display = function () {
   Game.display.drawText(1, 1, 'hello world')
+
   Game.screens.drawBorder()
   Game.screens.drawVersion()
   Game.screens.drawStatus()
+  Game.screens.drawSeed()
 }
 
 // ----- Initialization +++++
