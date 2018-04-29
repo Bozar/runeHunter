@@ -6,7 +6,7 @@ Game.text.ui = function (id) {
   let text = new Map()
 
   text.set('turn', 'Turn:')
-  text.set('bundern', 'Bundern:')
+  text.set('carry', 'Carry:')
   text.set('altar', 'Altar:')
   text.set('skull', 'Skull:')
   text.set('coin', 'Coin:')

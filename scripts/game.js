@@ -144,13 +144,13 @@ Game.UI.dungeon._x = Game.UI.padLeftRight
 Game.UI.dungeon._y = Game.UI.padTopBottom
 
 // ``` UI blocks +++
-Game.UI.bundern = new Game.UI(Game.UI.status.getWidth(), 2)
-Game.UI.bundern._x = Game.UI.status.getX()
-Game.UI.bundern._y = Game.UI.status.getY() + 2
+Game.UI.turn = new Game.UI(Game.UI.status.getWidth(), 2)
+Game.UI.turn._x = Game.UI.status.getX()
+Game.UI.turn._y = Game.UI.status.getY() + 2
 
 Game.UI.altar = new Game.UI(Game.UI.status.getWidth(), 1)
 Game.UI.altar._x = Game.UI.status.getX()
-Game.UI.altar._y = Game.UI.bundern.getY() + Game.UI.bundern.getHeight() + 1
+Game.UI.altar._y = Game.UI.turn.getY() + Game.UI.turn.getHeight() + 1
 
 Game.UI.treasure = new Game.UI(Game.UI.status.getWidth(), 4)
 Game.UI.treasure._x = Game.UI.status.getX()
@@ -240,8 +240,8 @@ Game.screens.drawVersion = function () {
 }
 
 Game.screens.drawStatus = function () {
-  let speed = 2
-  let bundern = 5
+  let turn = 2
+  let carry = 5
   let altar = 'Death'
 
   let hasSkull = 3
@@ -259,36 +259,35 @@ Game.screens.drawStatus = function () {
   let gemColor = changeColor(hasGem, needGem)
   let runeColor = changeColor(hasRune, needRune)
 
-  let alignBdn = 9
-  let alignAlt = 7
+  let align = 7
 
   let x = Game.UI.status.getX()
-  let yBdn = Game.UI.bundern.getY()
+  let yTrn = Game.UI.turn.getY()
   let yAlt = Game.UI.altar.getY()
   let yTrs = Game.UI.treasure.getY()
 
-  Game.display.drawText(x, yBdn, Game.text.ui('turn'))
-  Game.display.drawText(x, yBdn + 1, Game.text.ui('bundern'))
-  Game.display.drawText(x + alignBdn, yBdn, speed.toString())
-  Game.display.drawText(x + alignBdn, yBdn + 1, bundern.toString())
+  Game.display.drawText(x, yTrn, Game.text.ui('turn'))
+  Game.display.drawText(x, yTrn + 1, Game.text.ui('carry'))
+  Game.display.drawText(x + align, yTrn, turn.toString())
+  Game.display.drawText(x + align, yTrn + 1, carry.toString())
 
   Game.display.drawText(x, yAlt, Game.text.ui('altar'))
-  Game.display.drawText(x + alignAlt, yAlt, altar)
+  Game.display.drawText(x + align, yAlt, altar)
 
   Game.display.drawText(x, yTrs, Game.text.ui('skull'))
-  Game.display.drawText(x + alignAlt, yTrs,
+  Game.display.drawText(x + align, yTrs,
     Game.screens.colorfulText(hasSkull + '/' + needSkull, skullColor))
 
   Game.display.drawText(x, yTrs + 1, Game.text.ui('coin'))
-  Game.display.drawText(x + alignAlt, yTrs + 1,
+  Game.display.drawText(x + align, yTrs + 1,
     Game.screens.colorfulText(hasCoin + '/' + needCoin, coinColor))
 
   Game.display.drawText(x, yTrs + 2, Game.text.ui('gem'))
-  Game.display.drawText(x + alignAlt, yTrs + 2,
+  Game.display.drawText(x + align, yTrs + 2,
     Game.screens.colorfulText(hasGem + '/' + needGem, gemColor))
 
   Game.display.drawText(x, yTrs + 3, Game.text.ui('rune'))
-  Game.display.drawText(x + alignAlt, yTrs + 3,
+  Game.display.drawText(x + align, yTrs + 3,
     Game.screens.colorfulText(hasRune + '/' + needRune, runeColor))
 
   function changeColor (hasItem, requireItem) {
@@ -309,6 +308,23 @@ Game.screens.drawSeed = function () {
 
 Game.screens.drawModeLine = function (text) {
   Game.display.drawText(Game.UI.modeline.getX(), Game.UI.modeline.getY(), text)
+}
+
+// the text cannot be longer than the width of message block
+Game.screens.drawMessage = function (text) {
+  let msgList = []
+  let x = Game.UI.message.getX()
+  let y = Game.UI.message.getY()
+
+  text && msgList.push(text)
+  while (msgList.length > Game.UI.message.getHeight()) {
+    msgList.shift()
+  }
+  y += Game.UI.message.getHeight() - msgList.length
+
+  for (let i = 0; i < msgList.length; i++) {
+    Game.display.drawText(x, y + i, msgList[i])
+  }
 }
 
 // ``` In-game screens +++
