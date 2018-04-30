@@ -320,12 +320,28 @@ Game.screens.drawMessage = function (text) {
   }
 }
 
+Game.screens.drawDungeon = function () {
+  let dungeon = Game.getEntity('dungeon')
+  let x = Game.UI.dungeon.getX()
+  let y = Game.UI.dungeon.getY()
+
+  for (const [key, value] of dungeon.Dungeon.getTerrain()) {
+    Game.display.draw(
+      Number.parseInt(key.split(',')[0], 10) + x,
+      Number.parseInt(key.split(',')[1], 10) + y,
+      value === 0 ? '.' : '#')
+  }
+}
+
 // ``` In-game screens +++
 Game.screens.main = new Game.Screen('main')
 
 Game.screens.main.initialize = function () {
   Game.entity.seed()
   Game.getEntity('seed').Seed.setSeed(Game.getDevSeed())
+  ROT.RNG.setSeed(Game.entities.get('seed').Seed.getSeed())
+
+  Game.entity.dungeon()
   Game.entity.message()
 
   Game.screens.drawMessage('hello world')
@@ -338,12 +354,12 @@ Game.screens.main.initialize = function () {
 }
 
 Game.screens.main.display = function () {
-  Game.display.drawText(1, 1, 'hello world')
-
   Game.screens.drawBorder()
   Game.screens.drawVersion()
   Game.screens.drawStatus()
   Game.screens.drawSeed()
+
+  Game.screens.drawDungeon()
 }
 
 // ----- Initialization +++++

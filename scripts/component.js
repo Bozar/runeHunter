@@ -29,3 +29,18 @@ Game.Component.Seed = function () {
     }
   }
 }
+
+Game.Component.Dungeon = function () {
+  this._name = 'Dungeon'
+
+  this._width = Game.UI.dungeon.getWidth()
+  this._height = Game.UI.dungeon.getHeight()
+  this._terrain = new Map()   // z,x,y: 0(floor) or 1(wall)
+  this._memory = []           // explored dungeon
+
+  this.getWidth = function () { return this._width }
+  this.getHeight = function () { return this._height }
+
+  this.getTerrain = function () { return this._terrain }
+  this.getMemory = function () { return this._memory }
+}
