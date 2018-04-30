@@ -27,3 +27,52 @@ Game.system.placePC = function () {
 Game.system.isPC = function (actor) {
   return actor.getID() === Game.getEntity('pc').getID()
 }
+
+Game.system.isAltar = function (x, y) {
+  return false
+}
+
+Game.system.pcAct = function () {
+  Game.entities.get('timer').engine.lock()
+
+  Game.input.listenEvent('add', 'main')
+}
+
+Game.system.move = function (direction, actor) {
+  let duration = 1
+  let x = actor.Position.getX()
+  let y = actor.Position.getY()
+
+  switch (direction) {
+    case 'left':
+      x -= 1
+      break
+    case 'right':
+      x += 1
+      break
+    case 'up':
+      y -= 1
+      break
+    case 'down':
+      y += 1
+      break
+  }
+
+  if (Game.system.isFloor(x, y) && !Game.system.isAltar(x, y)) {
+    actor.Position.setX(x)
+    actor.Position.setY(y)
+
+    Game.input.listenEvent('remove', 'main')
+    Game.system.unlockEngine(duration)
+  } else {
+    console.log('you cannot move there')
+  }
+}
+
+Game.system.unlockEngine = function (duration) {
+  Game.entities.get('timer').scheduler.setDuration(duration)
+  Game.entities.get('timer').engine.unlock()
+
+  Game.display.clear()
+  Game.screens.main.display()
+}

@@ -245,24 +245,24 @@ Game.screens.drawStatus = function () {
 
   let hasSkull = 3
   let hasCoin = 1
-  let hasGem = 0
-  let hasRune = 3
+  let hasGem = 3
+  let hasRune = 2
 
   let needSkull = 1
   let needCoin = 2
   let needGem = 3
+  let needRune = 3
 
   let hasList = [hasSkull, hasCoin, hasGem, hasRune]
-  let needList = [needSkull, needCoin, needGem]
+  let needList = [needSkull, needCoin, needGem, needRune]
 
   let uiList = [Game.text.ui('skull'), Game.text.ui('coin'),
     Game.text.ui('gem'), Game.text.ui('rune')]
 
   let colorList = []
   for (let i = 0; i < needList.length; i++) {
-    colorList.push(hasList[i] > needList[i] ? 'orange' : 'white')
+    colorList.push(hasList[i] >= needList[i] ? 'orange' : 'white')
   }
-  colorList.push(null)
 
   let align = 7
   let x = Game.UI.status.getX()
@@ -387,6 +387,10 @@ Game.screens.main.initialize = function () {
   Game.entity.pc()
   Game.system.placePC()
 
+  Game.entity.timer()
+  Game.getEntity('timer').scheduler.add(Game.getEntity('pc'), true)
+  Game.getEntity('timer').engine.start()
+
   Game.getEntity('message').Message.getMsgList().push(
     'hello world')
   Game.getEntity('message').Message.getMsgList().push(
@@ -417,21 +421,13 @@ Game.screens.main.display = function () {
 
 Game.screens.main.keyInput = function (e) {
   let keyAction = Game.input.getAction
-  let pc = Game.getEntity('pc').Position
 
-  if (keyAction(e, 'move') === 'left') {
-    Game.system.isFloor(pc.getX() - 1, pc.getY()) &&
-      pc.setX(pc.getX() - 1)
-  } else if (keyAction(e, 'move') === 'right') {
-    Game.system.isFloor(pc.getX() + 1, pc.getY()) &&
-      pc.setX(pc.getX() + 1)
-  } else if (keyAction(e, 'move') === 'up') {
-    Game.system.isFloor(pc.getX(), pc.getY() - 1) &&
-      pc.setY(pc.getY() - 1)
-  } else if (keyAction(e, 'move') === 'down') {
-    Game.system.isFloor(pc.getX(), pc.getY() + 1) &&
-      pc.setY(pc.getY() + 1)
+  if (keyAction(e, 'move')) {
+    Game.system.move(keyAction(e, 'move'), Game.getEntity('pc'))
+  } else if (e.key === '0') {
+    console.log(Game.getEntity('timer').scheduler.getTime())
   }
+
   Game.display.clear()
   Game.screens.main.display()
 }
@@ -446,6 +442,4 @@ window.onload = function () {
 
   Game.display.clear()
   Game.screens.main.enter()
-
-  Game.input.listenEvent('add', 'main')
 }
