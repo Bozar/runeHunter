@@ -5,6 +5,7 @@ Game.entities = new Map()
 Game.entities.set('message', null)
 Game.entities.set('seed', null)
 Game.entities.set('dungeon', null)
+Game.entities.set('pc', null)
 
 // ----- Create a single entity +++++
 Game.entity = {}
@@ -48,4 +49,15 @@ Game.entity.dungeon = function () {
       e.Dungeon.getTerrain().set(x + ',' + y, wall)
     })
   }
+}
+
+Game.entity.pc = function () {
+  let e = new Game.Factory('pc')
+
+  e.addComponent(new Game.Component.Position(5))
+  e.addComponent(new Game.Component.Display('@'))
+
+  // e.act = Game.system.pcAct
+
+  Game.entities.set('pc', e)
 }

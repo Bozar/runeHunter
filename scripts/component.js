@@ -33,14 +33,44 @@ Game.Component.Seed = function () {
 Game.Component.Dungeon = function () {
   this._name = 'Dungeon'
 
-  this._width = Game.UI.dungeon.getWidth()
-  this._height = Game.UI.dungeon.getHeight()
+  this._width = Game.UI.dungeon.getWidth() - 2
+  this._height = Game.UI.dungeon.getHeight() - 2
+  this._padding = 1           // do not draw along the UI border
   this._terrain = new Map()   // z,x,y: 0(floor) or 1(wall)
   this._memory = []           // explored dungeon
+  this._hasFov = true         // only draw whatever the PC can see
 
   this.getWidth = function () { return this._width }
   this.getHeight = function () { return this._height }
-
+  this.getPadding = function () { return this._padding }
   this.getTerrain = function () { return this._terrain }
   this.getMemory = function () { return this._memory }
+  this.getFov = function () { return this._hasFov }
+
+  this.setFov = function (hasFov) { this._hasFov = hasFov }
+}
+
+Game.Component.Display = function (char, color) {
+  this._name = 'Display'
+
+  this._character = char
+  this._color = Game.getColor(color || 'white')
+
+  this.getCharacter = function () { return this._character }
+  this.getColor = function () { return this._color }
+}
+
+Game.Component.Position = function (range) {
+  this._name = 'Position'
+
+  this._x = null
+  this._y = null
+  this._sight = range || 0   // how far one can see
+
+  this.getX = function () { return this._x }
+  this.getY = function () { return this._y }
+  this.getSight = function () { return this._sight }
+
+  this.setX = function (pos) { this._x = pos }
+  this.setY = function (pos) { this._y = pos }
 }

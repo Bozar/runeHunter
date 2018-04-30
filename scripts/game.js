@@ -15,7 +15,6 @@ Game.setDevelop = function () { this._develop = !this._develop }
 Game.getDevSeed = function () { return this._devSeed }
 
 Game._color = new Map()
-Game._color.set(null, '')
 Game._color.set('white', '#ABB2BF')
 Game._color.set('black', '#262626')
 Game._color.set('grey', '#666666')
@@ -314,7 +313,6 @@ Game.screens.drawMessage = function (text) {
   }
   y += Game.UI.message.getHeight() - msgList.length
 
-  Game.display.clear()
   for (let i = 0; i < msgList.length; i++) {
     Game.display.drawText(x, y + i, msgList[i])
   }
@@ -322,14 +320,56 @@ Game.screens.drawMessage = function (text) {
 
 Game.screens.drawDungeon = function () {
   let dungeon = Game.getEntity('dungeon')
-  let x = Game.UI.dungeon.getX()
-  let y = Game.UI.dungeon.getY()
+  let memory = dungeon.Dungeon.getMemory()
+  let pcX = Game.getEntity('pc').Position.getX()
+  let pcY = Game.getEntity('pc').Position.getY()
+  let sight = Game.getEntity('pc').Position.getSight()
 
-  for (const [key, value] of dungeon.Dungeon.getTerrain()) {
+  if (dungeon.Dungeon.getFov()) {
+    if (memory.length > 0) {
+      for (let i = 0; i < memory.length; i++) {
+        drawTerrain(
+          memory[i].split(',')[0],
+          memory[i].split(',')[1],
+          'grey')
+      }
+    }
+
+    dungeon.fov.compute(pcX, pcY, sight, function (x, y) {
+      memory.indexOf(x + ',' + y) < 0 && memory.push(x + ',' + y)
+      drawTerrain(x, y, 'white')
+    })
+  } else {
+    for (const keyValue of dungeon.Dungeon.getTerrain()) {
+      drawTerrain(
+        keyValue[0].split(',')[0],
+        keyValue[0].split(',')[1],
+        'white')
+    }
+  }
+
+  function drawTerrain (x, y, color) {
+    x = Number.parseInt(x, 10)
+    y = Number.parseInt(y, 10)
+
     Game.display.draw(
-      Number.parseInt(key.split(',')[0], 10) + x,
-      Number.parseInt(key.split(',')[1], 10) + y,
-      value === 0 ? '.' : '#')
+      x + Game.UI.dungeon.getX() + dungeon.Dungeon.getPadding(),
+      y + Game.UI.dungeon.getY() + dungeon.Dungeon.getPadding(),
+      Game.system.isFloor(x, y) ? '.' : '#',
+      Game.getColor(color))
+  }
+}
+
+Game.screens.drawActor = function (actor, hasFov) {
+  let dungeon = Game.getEntity('dungeon').Dungeon
+
+  if ((hasFov || dungeon.getFov()) && !Game.system.isPC(actor)) {
+    console.log('draw inside fov')
+  } else {
+    Game.display.draw(
+      actor.Position.getX() + Game.UI.dungeon.getX() + dungeon.getPadding(),
+      actor.Position.getY() + Game.UI.dungeon.getY() + dungeon.getPadding(),
+      actor.Display.getCharacter(), actor.Display.getColor())
   }
 }
 
@@ -344,13 +384,23 @@ Game.screens.main.initialize = function () {
   Game.entity.dungeon()
   Game.entity.message()
 
-  Game.screens.drawMessage('hello world')
-  Game.screens.drawMessage('welcome to the dungeon')
-  Game.screens.drawMessage('You cannot drop the treasure here.')
-  Game.screens.drawMessage('You drop the Alluring Skull.')
-  Game.screens.drawMessage('You drop the Red Stone of Aja.')
-  Game.screens.drawMessage('You pick up the Red Stone of Aja.')
-  Game.screens.drawMessage('You find the Double-Headed Coin.')
+  Game.entity.pc()
+  Game.system.placePC()
+
+  Game.getEntity('message').Message.getMsgList().push(
+    'hello world')
+  Game.getEntity('message').Message.getMsgList().push(
+    'welcome to the dungeon')
+  Game.getEntity('message').Message.getMsgList().push(
+    'You cannot drop the treasure here.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'You drop the Alluring Skull.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'You drop the Red Stone of Aja.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'You pick up the Red Stone of Aja.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'You find the Double-Headed Coin.')
 }
 
 Game.screens.main.display = function () {
@@ -360,6 +410,30 @@ Game.screens.main.display = function () {
   Game.screens.drawSeed()
 
   Game.screens.drawDungeon()
+  Game.screens.drawActor(Game.getEntity('pc'))
+
+  Game.screens.drawMessage()
+}
+
+Game.screens.main.keyInput = function (e) {
+  let keyAction = Game.input.getAction
+  let pc = Game.getEntity('pc').Position
+
+  if (keyAction(e, 'move') === 'left') {
+    Game.system.isFloor(pc.getX() - 1, pc.getY()) &&
+      pc.setX(pc.getX() - 1)
+  } else if (keyAction(e, 'move') === 'right') {
+    Game.system.isFloor(pc.getX() + 1, pc.getY()) &&
+      pc.setX(pc.getX() + 1)
+  } else if (keyAction(e, 'move') === 'up') {
+    Game.system.isFloor(pc.getX(), pc.getY() - 1) &&
+      pc.setY(pc.getY() - 1)
+  } else if (keyAction(e, 'move') === 'down') {
+    Game.system.isFloor(pc.getX(), pc.getY() + 1) &&
+      pc.setY(pc.getY() + 1)
+  }
+  Game.display.clear()
+  Game.screens.main.display()
 }
 
 // ----- Initialization +++++
@@ -372,4 +446,6 @@ window.onload = function () {
 
   Game.display.clear()
   Game.screens.main.enter()
+
+  Game.input.listenEvent('add', 'main')
 }
