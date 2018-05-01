@@ -8,6 +8,7 @@ Game.entities.set('dungeon', null)
 Game.entities.set('pc', null)
 Game.entities.set('timer', null)
 Game.entities.set('harbinger', null)
+Game.entities.set('item', new Map())
 
 // ----- Create a single entity +++++
 Game.entity = {}
@@ -81,4 +82,31 @@ Game.entity.harbinger = function () {
   e.act = Game.system.harbingerAct
 
   Game.entities.set('harbinger', e)
+}
+
+Game.entity.skull = function (x, y) {
+  let e = new Game.Factory('skull')
+
+  e.addComponent(new Game.Component.Position(0, x, y))
+  e.addComponent(new Game.Component.Display('?'))
+
+  Game.entities.get('item').set(e.getID(), e)
+}
+
+Game.entity.coin = function (x, y) {
+  let e = new Game.Factory('coin')
+
+  e.addComponent(new Game.Component.Position(0, x, y))
+  e.addComponent(new Game.Component.Display('$'))
+
+  Game.entities.get('item').set(e.getID(), e)
+}
+
+Game.entity.gem = function (x, y) {
+  let e = new Game.Factory('gem')
+
+  e.addComponent(new Game.Component.Position(0, x, y))
+  e.addComponent(new Game.Component.Display('*'))
+
+  Game.entities.get('item').set(e.getID(), e)
 }

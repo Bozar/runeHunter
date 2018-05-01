@@ -356,17 +356,34 @@ Game.screens.drawDungeon = function () {
   }
 }
 
-Game.screens.drawActor = function (actor, hasFov) {
-  let dungeon = Game.getEntity('dungeon').Dungeon
-
-  if ((hasFov || dungeon.getFov()) && !Game.system.isPC(actor)) {
-    console.log('draw inside fov')
-  } else {
-    Game.display.draw(
-      actor.Position.getX() + Game.UI.dungeon.getX() + dungeon.getPadding(),
-      actor.Position.getY() + Game.UI.dungeon.getY() + dungeon.getPadding(),
-      actor.Display.getCharacter(), actor.Display.getColor())
+Game.screens.drawItem = function () {
+  for (const keyValue of Game.getEntity('item')) {
+    Game.screens.drawActor(keyValue[1])
   }
+}
+
+Game.screens.drawActor = function (actor, noFov) {
+  let drawThis = false
+
+  let dungeon = Game.getEntity('dungeon')
+  let pc = Game.getEntity('pc').Position
+  let actorX = actor.Position.getX()
+  let actorY = actor.Position.getY()
+
+  if (!noFov && dungeon.Dungeon.getFov() && !Game.system.isPC(actor)) {
+    dungeon.fov.compute(pc.getX(), pc.getY(), pc.getSight(), function (x, y) {
+      if (x === actorX && y === actorY) {
+        drawThis = true
+      }
+    })
+  } else {
+    drawThis = true
+  }
+
+  drawThis && Game.display.draw(
+    actorX + Game.UI.dungeon.getX() + dungeon.Dungeon.getPadding(),
+    actorY + Game.UI.dungeon.getY() + dungeon.Dungeon.getPadding(),
+    actor.Display.getCharacter(), actor.Display.getColor())
 }
 
 // ``` In-game screens +++
@@ -422,6 +439,7 @@ Game.screens.main.display = function () {
   Game.screens.drawSeed()
 
   Game.screens.drawDungeon()
+  Game.screens.drawItem()
   Game.screens.drawActor(Game.getEntity('pc'))
 
   Game.screens.drawMessage()
@@ -434,6 +452,15 @@ Game.screens.main.keyInput = function (e) {
     Game.system.move(keyAction(e, 'move'))
   } else if (e.key === '0') {
     console.log(Game.getEntity('timer').scheduler.getTime())
+  } else if (e.key === '1') {
+    Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
+    Game.getEntity('pc').Position.getY())
+  } else if (e.key === '2') {
+    Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
+    Game.getEntity('pc').Position.getY())
+  } else if (e.key === '3') {
+    Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
+    Game.getEntity('pc').Position.getY())
   }
 
   Game.display.clear()

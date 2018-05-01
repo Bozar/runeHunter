@@ -60,11 +60,11 @@ Game.Component.Display = function (char, color) {
   this.getColor = function () { return this._color }
 }
 
-Game.Component.Position = function (range) {
+Game.Component.Position = function (range, x, y) {
   this._name = 'Position'
 
-  this._x = null
-  this._y = null
+  this._x = x
+  this._y = y
   this._sight = range || 0   // how far one can see
 
   this.getX = function () { return this._x }
