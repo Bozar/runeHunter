@@ -58,6 +58,7 @@ Game.entity.pc = function () {
 
   e.addComponent(new Game.Component.Position(5))
   e.addComponent(new Game.Component.Display('@'))
+  e.addComponent(new Game.Component.Bagpack())
 
   e.act = Game.system.pcAct
 

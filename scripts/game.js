@@ -239,21 +239,17 @@ Game.screens.drawVersion = function () {
 }
 
 Game.screens.drawStatus = function () {
-  let turn = 2
-  let carry = 5
+  let pc = Game.getEntity('pc').Bagpack
+  let turn = pc.getSpeed()
+  let carry = pc.getTotal()
   let altar = 'Death'
-
-  let hasSkull = 3
-  let hasCoin = 1
-  let hasGem = 3
-  let hasRune = 2
 
   let needSkull = 1
   let needCoin = 2
   let needGem = 3
   let needRune = 3
 
-  let hasList = [hasSkull, hasCoin, hasGem, hasRune]
+  let hasList = [pc.getSkull(), pc.getCoin(), pc.getGem(), pc.getRune()]
   let needList = [needSkull, needCoin, needGem, needRune]
 
   let uiList = [Game.text.ui('skull'), Game.text.ui('coin'),
@@ -393,6 +389,16 @@ Game.screens.main.initialize = function () {
   Game.getEntity('timer').scheduler.add(Game.getEntity('harbinger'), true)
   Game.getEntity('timer').engine.start()
 
+  for (let i = 0; i < 4; i++) {
+    Game.getEntity('pc').Bagpack.pickItem('skull')
+  }
+  for (let i = 0; i < 4; i++) {
+    Game.getEntity('pc').Bagpack.pickItem('coin')
+  }
+  for (let i = 0; i < 4; i++) {
+    Game.getEntity('pc').Bagpack.pickItem('gem')
+  }
+
   Game.getEntity('message').Message.getMsgList().push(
     'hello world')
   Game.getEntity('message').Message.getMsgList().push(
@@ -425,7 +431,7 @@ Game.screens.main.keyInput = function (e) {
   let keyAction = Game.input.getAction
 
   if (keyAction(e, 'move')) {
-    Game.system.move(keyAction(e, 'move'), Game.getEntity('pc'))
+    Game.system.move(keyAction(e, 'move'))
   } else if (e.key === '0') {
     console.log(Game.getEntity('timer').scheduler.getTime())
   }

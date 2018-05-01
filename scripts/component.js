@@ -81,13 +81,11 @@ Game.Component.Counter = function () {
   this._start = 50
   this._warning = 10
   this._count = this._start
-  this._hasGhost = false
 
-  this.getGhost = function () { return this._hasGhost }
+  this.hasGhost = function () { return this._count <= 0 }
 
   this.countdown = function () {
     this._count -= 1
-    this._hasGhost = this._count === 0
 
     return this._count === this._warning
       ? 'warning'
@@ -98,6 +96,42 @@ Game.Component.Counter = function () {
 
   this.reset = function () {
     this._count = this._start
-    this._hasGhost = false
+  }
+}
+
+Game.Component.Bagpack = function () {
+  this._name = 'Bagpack'
+
+  this._skull = 0
+  this._coin = 0
+  this._gem = 0
+  this._rune = 0
+  this._max = 9
+
+  this.getSkull = function () { return this._skull }
+  this.getCoin = function () { return this._coin }
+  this.getGem = function () { return this._gem }
+  this.getRune = function () { return this._rune }
+
+  this.getTotal = function () {
+    return this._skull + this._coin + this._gem + this._rune
+  }
+  this.getSpeed = function () {
+    return Math.max(1, Math.ceil(this.getTotal() / 3))
+  }
+
+  this.pickItem = function (item) {
+    if (this.getTotal() < this._max) {
+      this['_' + item] += 1
+      return true
+    }
+    return false
+  }
+  this.dropItem = function (item) {
+    if (this['_' + item] > 0) {
+      this['_' + item] -= 1
+      return true
+    }
+    return false
   }
 }

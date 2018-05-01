@@ -34,8 +34,7 @@ Game.system.isAltar = function (x, y) {
 
 Game.system.pcAct = function () {
   Game.getEntity('timer').engine.lock()
-
-  if (Game.getEntity('harbinger').Counter.getGhost()) {
+  if (Game.getEntity('harbinger').Counter.hasGhost()) {
     Game.input.listenEvent('add', lure)
   } else {
     Game.input.listenEvent('add', 'main')
@@ -69,8 +68,9 @@ Game.system.harbingerAct = function () {
   Game.system.unlockEngine(1)
 }
 
-Game.system.move = function (direction, actor) {
-  let duration = 1
+Game.system.move = function (direction) {
+  let actor = Game.getEntity('pc')
+  let duration = actor.Bagpack.getSpeed()
   let x = actor.Position.getX()
   let y = actor.Position.getY()
 
