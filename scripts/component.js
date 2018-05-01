@@ -74,3 +74,30 @@ Game.Component.Position = function (range) {
   this.setX = function (pos) { this._x = pos }
   this.setY = function (pos) { this._y = pos }
 }
+
+Game.Component.Counter = function () {
+  this._name = 'Counter'
+
+  this._start = 50
+  this._warning = 10
+  this._count = this._start
+  this._hasGhost = false
+
+  this.getGhost = function () { return this._hasGhost }
+
+  this.countdown = function () {
+    this._count -= 1
+    this._hasGhost = this._count === 0
+
+    return this._count === this._warning
+      ? 'warning'
+      : this._count === 0
+        ? 'ghost'
+        : null
+  }
+
+  this.reset = function () {
+    this._count = this._start
+    this._hasGhost = false
+  }
+}

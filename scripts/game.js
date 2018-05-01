@@ -379,16 +379,18 @@ Game.screens.main = new Game.Screen('main')
 Game.screens.main.initialize = function () {
   Game.entity.seed()
   Game.getEntity('seed').Seed.setSeed(Game.getDevSeed())
-  ROT.RNG.setSeed(Game.entities.get('seed').Seed.getSeed())
+  ROT.RNG.setSeed(Game.getEntity('seed').Seed.getSeed())
 
   Game.entity.dungeon()
   Game.entity.message()
 
   Game.entity.pc()
   Game.system.placePC()
+  Game.entity.harbinger()
 
   Game.entity.timer()
   Game.getEntity('timer').scheduler.add(Game.getEntity('pc'), true)
+  Game.getEntity('timer').scheduler.add(Game.getEntity('harbinger'), true)
   Game.getEntity('timer').engine.start()
 
   Game.getEntity('message').Message.getMsgList().push(

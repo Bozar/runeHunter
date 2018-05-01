@@ -33,9 +33,40 @@ Game.system.isAltar = function (x, y) {
 }
 
 Game.system.pcAct = function () {
-  Game.entities.get('timer').engine.lock()
+  Game.getEntity('timer').engine.lock()
 
-  Game.input.listenEvent('add', 'main')
+  if (Game.getEntity('harbinger').Counter.getGhost()) {
+    Game.input.listenEvent('add', lure)
+  } else {
+    Game.input.listenEvent('add', 'main')
+  }
+
+  function lure (e) {
+    if (e.key === 'Escape') {
+      console.log('ghost is away')
+
+      Game.input.listenEvent('remove', lure)
+      Game.getEntity('harbinger').Counter.reset()
+      Game.system.unlockEngine(1)
+    } else {
+      console.log('invalid key')
+    }
+  }
+}
+
+Game.system.harbingerAct = function () {
+  Game.getEntity('timer').engine.lock()
+
+  switch (Game.getEntity('harbinger').Counter.countdown()) {
+    case 'warning':
+      console.log('10 turns left')
+      break
+    case 'ghost':
+      console.log('ghost appears')
+      break
+  }
+
+  Game.system.unlockEngine(1)
 }
 
 Game.system.move = function (direction, actor) {
@@ -70,8 +101,8 @@ Game.system.move = function (direction, actor) {
 }
 
 Game.system.unlockEngine = function (duration) {
-  Game.entities.get('timer').scheduler.setDuration(duration)
-  Game.entities.get('timer').engine.unlock()
+  Game.getEntity('timer').scheduler.setDuration(duration)
+  Game.getEntity('timer').engine.unlock()
 
   Game.display.clear()
   Game.screens.main.display()

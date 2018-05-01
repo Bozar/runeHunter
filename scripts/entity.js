@@ -7,6 +7,7 @@ Game.entities.set('seed', null)
 Game.entities.set('dungeon', null)
 Game.entities.set('pc', null)
 Game.entities.set('timer', null)
+Game.entities.set('harbinger', null)
 
 // ----- Create a single entity +++++
 Game.entity = {}
@@ -70,4 +71,13 @@ Game.entity.timer = function () {
   e.engine = new ROT.Engine(e.scheduler)
 
   Game.entities.set('timer', e)
+}
+
+Game.entity.harbinger = function () {
+  let e = new Game.Factory('harbinger')
+
+  e.addComponent(new Game.Component.Counter())
+  e.act = Game.system.harbingerAct
+
+  Game.entities.set('harbinger', e)
 }
