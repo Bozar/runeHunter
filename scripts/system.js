@@ -32,14 +32,25 @@ Game.system.isAltar = function (x, y) {
   return false
 }
 
+Game.system.isItem = function (x, y) {
+  for (const keyValue of Game.getEntity('item')) {
+    if (x === keyValue[1].Position.getX() && y === keyValue[1].Position.getY()) {
+      return keyValue[1]
+    }
+  }
+  return null
+}
+
 Game.system.pcAct = function () {
   Game.getEntity('timer').engine.lock()
+
   if (Game.getEntity('harbinger').Counter.hasGhost()) {
     Game.input.listenEvent('add', lure)
   } else {
     Game.input.listenEvent('add', 'main')
   }
 
+  // helper function
   function lure (e) {
     if (e.key === 'Escape') {
       console.log('ghost is away')
@@ -93,6 +104,10 @@ Game.system.move = function (direction) {
     actor.Position.setX(x)
     actor.Position.setY(y)
 
+    Game.system.isItem(x, y) &&
+      Game.getEntity('message').Message.pushMsg(
+        Game.text.interact('find', Game.system.isItem(x, y).getEntityName()))
+
     Game.input.listenEvent('remove', 'main')
     Game.system.unlockEngine(duration)
   } else {
@@ -106,4 +121,30 @@ Game.system.unlockEngine = function (duration) {
 
   Game.display.clear()
   Game.screens.main.display()
+}
+
+Game.system.pickUp = function (x, y) {
+  let item = Game.system.isItem(x, y)
+
+  if (!item) {
+    Game.getEntity('message').Message.setModeline(
+      Game.text.interact('emptyFloor'))
+
+    return false
+  }
+
+  if (Game.getEntity('pc').Bagpack.pickItem(item.getEntityName())) {
+    Game.getEntity('message').Message.pushMsg(
+      Game.text.interact(('pick'), item.getEntityName()))
+
+    Game.getEntity('item').delete(item.getID())
+    Game.system.unlockEngine(1)
+
+    return true
+  } else {
+    Game.getEntity('message').Message.setModeline(
+      Game.text.interact('fullBag'))
+
+    return false
+  }
 }

@@ -293,8 +293,9 @@ Game.screens.drawSeed = function () {
     seed, 'grey')
 }
 
-Game.screens.drawModeLine = function (text) {
-  Game.display.drawText(Game.UI.modeline.getX(), Game.UI.modeline.getY(), text)
+Game.screens.drawModeLine = function () {
+  Game.display.drawText(Game.UI.modeline.getX(), Game.UI.modeline.getY(),
+    Game.getEntity('message').Message.getModeline())
 }
 
 // the text cannot be longer than the width of message block
@@ -406,16 +407,6 @@ Game.screens.main.initialize = function () {
   Game.getEntity('timer').scheduler.add(Game.getEntity('harbinger'), true)
   Game.getEntity('timer').engine.start()
 
-  for (let i = 0; i < 4; i++) {
-    Game.getEntity('pc').Bagpack.pickItem('skull')
-  }
-  for (let i = 0; i < 4; i++) {
-    Game.getEntity('pc').Bagpack.pickItem('coin')
-  }
-  for (let i = 0; i < 4; i++) {
-    Game.getEntity('pc').Bagpack.pickItem('gem')
-  }
-
   Game.getEntity('message').Message.getMsgList().push(
     'hello world')
   Game.getEntity('message').Message.getMsgList().push(
@@ -430,6 +421,14 @@ Game.screens.main.initialize = function () {
     'You pick up the Red Stone of Aja.')
   Game.getEntity('message').Message.getMsgList().push(
     'You find the Double-Headed Coin.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'Press arrow keys or hjkl to move around.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'Press Space to confirm, Esc to cancel.')
+  Game.getEntity('message').Message.getMsgList().push(
+    '[T] You have 10 turns before the ghost appears.')
+  Game.getEntity('message').Message.getMsgList().push(
+    '[T] Try to carry more items and stick to the wall.')
 }
 
 Game.screens.main.display = function () {
@@ -443,24 +442,29 @@ Game.screens.main.display = function () {
   Game.screens.drawActor(Game.getEntity('pc'))
 
   Game.screens.drawMessage()
+  Game.screens.drawModeLine()
 }
 
 Game.screens.main.keyInput = function (e) {
   let keyAction = Game.input.getAction
+  let x = Game.getEntity('pc').Position.getX()
+  let y = Game.getEntity('pc').Position.getY()
 
   if (keyAction(e, 'move')) {
     Game.system.move(keyAction(e, 'move'))
+  } else if (keyAction(e, 'fixed') === 'space') {
+    Game.system.pickUp(x, y)
   } else if (e.key === '0') {
     console.log(Game.getEntity('timer').scheduler.getTime())
   } else if (e.key === '1') {
     Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
-    Game.getEntity('pc').Position.getY())
+      Game.getEntity('pc').Position.getY())
   } else if (e.key === '2') {
     Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
-    Game.getEntity('pc').Position.getY())
+      Game.getEntity('pc').Position.getY())
   } else if (e.key === '3') {
     Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
-    Game.getEntity('pc').Position.getY())
+      Game.getEntity('pc').Position.getY())
   }
 
   Game.display.clear()

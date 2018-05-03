@@ -15,3 +15,25 @@ Game.text.ui = function (id) {
 
   return text.get(id)
 }
+
+Game.text.item = function (id) {
+  let text = new Map()
+
+  text.set('skull', 'Alluring Skull')
+  text.set('coin', 'Double-Headed Coin')
+  text.set('gem', 'Red Stone of Aja')
+
+  return text.get(id)
+}
+
+Game.text.interact = function (id, item) {
+  let text = new Map()
+
+  text.set('find', 'You find the ' + Game.text.item(item) + '.')
+  text.set('pick', 'You pick up the ' + Game.text.item(item) + '.')
+  text.set('drop', 'You drop the ' + Game.text.item(item) + '.')
+  text.set('emptyFloor', 'There is nothing to pick up here.')
+  text.set('fullBag', 'Your bag is full.')
+
+  return text.get(id)
+}
