@@ -135,7 +135,7 @@ Game.system.pickUp = function (x, y) {
 
   if (Game.getEntity('pc').Bagpack.pickItem(item.getEntityName())) {
     Game.getEntity('message').Message.pushMsg(
-      Game.text.interact(('pick'), item.getEntityName()))
+      Game.text.interact('pick', item.getEntityName()))
 
     Game.getEntity('item').delete(item.getID())
     Game.system.unlockEngine(1)
@@ -146,5 +146,32 @@ Game.system.pickUp = function (x, y) {
       Game.text.interact('fullBag'))
 
     return false
+  }
+}
+
+Game.system.drop = function (item) {
+  let x = Game.getEntity('pc').Position.getX()
+  let y = Game.getEntity('pc').Position.getY()
+
+  if (Game.system.isItem(x, y)) {
+    Game.getEntity('message').Message.setModeline(
+      Game.text.interact('occupiedFloor'))
+
+    return false
+  }
+
+  if (!Game.getEntity('pc').Bagpack.dropItem(item)) {
+    Game.getEntity('message').Message.setModeline(
+      Game.text.interact('emptyBag'))
+
+    return false
+  } else {
+    Game.entity[item](x, y)
+
+    Game.getEntity('message').Message.pushMsg(
+      Game.text.interact('drop', item))
+    Game.system.unlockEngine(1)
+
+    return true
   }
 }

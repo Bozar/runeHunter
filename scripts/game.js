@@ -454,15 +454,17 @@ Game.screens.main.keyInput = function (e) {
     Game.system.move(keyAction(e, 'move'))
   } else if (keyAction(e, 'fixed') === 'space') {
     Game.system.pickUp(x, y)
+  } else if (keyAction(e, 'drop')) {
+    Game.system.drop(keyAction(e, 'drop'))
   } else if (e.key === '0') {
     console.log(Game.getEntity('timer').scheduler.getTime())
-  } else if (e.key === '1') {
+  } else if (e.key === '4') {
     Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
       Game.getEntity('pc').Position.getY())
-  } else if (e.key === '2') {
+  } else if (e.key === '5') {
     Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
       Game.getEntity('pc').Position.getY())
-  } else if (e.key === '3') {
+  } else if (e.key === '6') {
     Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
       Game.getEntity('pc').Position.getY())
   }

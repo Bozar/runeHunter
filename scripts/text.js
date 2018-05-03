@@ -33,6 +33,8 @@ Game.text.interact = function (id, item) {
   text.set('pick', 'You pick up the ' + Game.text.item(item) + '.')
   text.set('drop', 'You drop the ' + Game.text.item(item) + '.')
   text.set('emptyFloor', 'There is nothing to pick up here.')
+  text.set('emptyBag', 'You have nothing to drop.')
+  text.set('occupiedFloor', 'You cannot drop the item here.')
   text.set('fullBag', 'Your bag is full.')
 
   return text.get(id)
