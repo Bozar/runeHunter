@@ -398,14 +398,16 @@ Game.screens.drawGhost = function () {
   let drawHere = []
   let position = null
 
-  dungeon.fov.compute(pcX, pcY, sight, function (x, y) {
-    if (x !== pcX && y !== pcY && Game.system.isFloor(x, y)) {
-      drawHere.push(x + ',' + y)
-    }
-  })
-  position = drawHere[Math.floor(ROT.RNG.getUniform() * drawHere.length)]
-  harbinger.Position.setX(position.split(',')[0])
-  harbinger.Position.setY(position.split(',')[1])
+  if (!(harbinger.Position.getX() && harbinger.Position.getY())) {
+    dungeon.fov.compute(pcX, pcY, sight, function (x, y) {
+      if (x !== pcX && y !== pcY && Game.system.isFloor(x, y)) {
+        drawHere.push(x + ',' + y)
+      }
+    })
+    position = drawHere[Math.floor(ROT.RNG.getUniform() * drawHere.length)]
+    harbinger.Position.setX(position.split(',')[0])
+    harbinger.Position.setY(position.split(',')[1])
+  }
 
   Game.screens.drawActor(harbinger)
 }

@@ -52,15 +52,27 @@ Game.system.pcAct = function () {
 
   // helper function
   function lure (e) {
-    if (e.key === 'Escape') {
-      console.log('ghost is away')
+    let item = Game.input.getAction(e, 'drop')
+    let message = Game.getEntity('message').Message
+    let bag = Game.getEntity('pc').Bagpack
 
-      Game.input.listenEvent('remove', lure)
-      Game.getEntity('harbinger').Counter.reset()
-      Game.system.unlockEngine(1)
+    if (item) {
+      if (bag.dropItem(item, true)) {
+        message.pushMsg(Game.text.encounter('lure', item))
+        message.pushMsg(Game.text.encounter('reaction', item))
+
+        Game.input.listenEvent('remove', lure)
+        Game.system.resetHarbinger(item)
+        Game.system.unlockEngine(1)
+      } else {
+        message.setModeline(Game.text.encounter('more', item))
+      }
     } else {
-      console.log('invalid key')
+      message.setModeline(Game.text.encounter('invalid'))
     }
+
+    Game.display.clear()
+    Game.screens.main.display()
   }
 }
 
@@ -193,4 +205,10 @@ Game.system.isDead = function () {
   let hasGem = Game.getEntity('pc').Bagpack.getGem() > 0
 
   return !(hasSkull || hasCoin || hasGem)
+}
+
+Game.system.resetHarbinger = function (item) {
+  Game.getEntity('harbinger').Counter.reset(item)
+  Game.getEntity('harbinger').Position.setX(null)
+  Game.getEntity('harbinger').Position.setY(null)
 }

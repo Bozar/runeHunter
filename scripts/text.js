@@ -26,6 +26,7 @@ Game.text.item = function (id) {
   return text.get(id)
 }
 
+// move, pick up and drop
 Game.text.interact = function (id, item) {
   let text = new Map()
 
@@ -41,13 +42,30 @@ Game.text.interact = function (id, item) {
   return text.get(id)
 }
 
-Game.text.encounter = function (id) {
+// lure away the ghost
+Game.text.encounter = function (id, item) {
   let text = new Map()
 
   text.set('warn', 'Something bad is going to happen.')
   text.set('dead', 'You are caught by the ghost.')
   text.set('appear', 'The ghost appears from nowhere!')
+  text.set('invalid', 'You need to drop some treasure.')
   text.set('end', '===The End===')
+  text.set('more', 'You need more ' + item + 's.')
+  text.set('lure', 'You lure away the ghost with the ' +
+    Game.text.item(item) + '.')
+  text.set('reaction', 'The ghost is ' + getReaction(item) + '.')
 
   return text.get(id)
+
+  function getReaction (item) {
+    switch (item) {
+      case 'skull':
+        return 'irritated'
+      case 'coin':
+        return 'silent'
+      case 'gem':
+        return 'satisfied'
+    }
+  }
 }

@@ -103,8 +103,18 @@ Game.Component.Counter = function () {
         : null
   }
 
-  this.reset = function () {
-    this._count = this._start
+  this.reset = function (item) {
+    switch (item) {
+      case 'gem':
+        this._count = Math.floor(this._start * 1.4)
+        break
+      case 'skull':
+        this._count = Math.floor(this._start * 0.6)
+        break
+      default:
+        this._count = this._start
+        break
+    }
   }
 }
 
@@ -136,11 +146,19 @@ Game.Component.Bagpack = function () {
     }
     return false
   }
-  this.dropItem = function (item) {
-    if (this['_' + item] > 0) {
-      this['_' + item] -= 1
-      return true
+  this.dropItem = function (item, hasGhost) {
+    if (hasGhost && item === 'coin') {
+      if (this._coin > 1) {
+        this._coin -= 2
+        return true
+      }
+      return false
+    } else {
+      if (this['_' + item] > 0) {
+        this['_' + item] -= 1
+        return true
+      }
+      return false
     }
-    return false
   }
 }
