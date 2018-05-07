@@ -78,6 +78,8 @@ Game.entity.timer = function () {
 Game.entity.harbinger = function () {
   let e = new Game.Factory('harbinger')
 
+  e.addComponent(new Game.Component.Display('G'))
+  e.addComponent(new Game.Component.Position())
   e.addComponent(new Game.Component.Counter())
   e.act = Game.system.harbingerAct
 

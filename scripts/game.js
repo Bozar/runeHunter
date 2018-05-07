@@ -368,8 +368,8 @@ Game.screens.drawActor = function (actor, noFov) {
 
   let dungeon = Game.getEntity('dungeon')
   let pc = Game.getEntity('pc').Position
-  let actorX = actor.Position.getX()
-  let actorY = actor.Position.getY()
+  let actorX = Number.parseInt(actor.Position.getX(), 10)
+  let actorY = Number.parseInt(actor.Position.getY(), 10)
 
   if (!noFov && dungeon.Dungeon.getFov() && !Game.system.isPC(actor)) {
     dungeon.fov.compute(pc.getX(), pc.getY(), pc.getSight(), function (x, y) {
@@ -385,6 +385,28 @@ Game.screens.drawActor = function (actor, noFov) {
     actorX + Game.UI.dungeon.getX() + dungeon.Dungeon.getPadding(),
     actorY + Game.UI.dungeon.getY() + dungeon.Dungeon.getPadding(),
     actor.Display.getCharacter(), actor.Display.getColor())
+}
+
+Game.screens.drawGhost = function () {
+  let pcX = Game.getEntity('pc').Position.getX()
+  let pcY = Game.getEntity('pc').Position.getY()
+  let sight = Game.getEntity('pc').Position.getSight()
+  let harbinger = Game.getEntity('harbinger')
+  let dungeon = Game.getEntity('dungeon')
+
+  let drawHere = []
+  let position = null
+
+  dungeon.fov.compute(pcX, pcY, sight, function (x, y) {
+    if (x !== pcX && y !== pcY && Game.system.isFloor(x, y)) {
+      drawHere.push(x + ',' + y)
+    }
+  })
+  position = drawHere[Math.floor(ROT.RNG.getUniform() * drawHere.length)]
+  harbinger.Position.setX(position.split(',')[0])
+  harbinger.Position.setY(position.split(',')[1])
+
+  Game.screens.drawActor(harbinger)
 }
 
 // ``` In-game screens +++
@@ -443,6 +465,8 @@ Game.screens.main.display = function () {
 
   Game.screens.drawMessage()
   Game.screens.drawModeLine()
+
+  Game.getEntity('harbinger').Counter.hasGhost() && Game.screens.drawGhost()
 }
 
 Game.screens.main.keyInput = function (e) {
