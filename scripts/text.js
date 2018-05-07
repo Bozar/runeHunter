@@ -36,6 +36,18 @@ Game.text.interact = function (id, item) {
   text.set('emptyBag', 'You have nothing to drop.')
   text.set('occupiedFloor', 'You cannot drop the item here.')
   text.set('fullBag', 'Your bag is full.')
+  text.set('forbidMove', 'You cannot move there.')
+
+  return text.get(id)
+}
+
+Game.text.encounter = function (id) {
+  let text = new Map()
+
+  text.set('warn', 'Something bad is going to happen.')
+  text.set('dead', 'You are caught by the ghost.')
+  text.set('appear', 'The ghost appears from nowhere!')
+  text.set('end', '===The End===')
 
   return text.get(id)
 }

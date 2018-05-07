@@ -34,6 +34,7 @@ Game.input.keybind.set('fixed', new Map())
 Game.input.keybind.get('fixed').set('space', [' '])
 Game.input.keybind.get('fixed').set('enter', ['Enter'])
 Game.input.keybind.get('fixed').set('esc', ['Escape'])
+Game.input.keybind.get('fixed').set('develop', ['~'])
 
 // movement
 Game.input.keybind.set('move', new Map())
@@ -474,7 +475,11 @@ Game.screens.main.keyInput = function (e) {
   let x = Game.getEntity('pc').Position.getX()
   let y = Game.getEntity('pc').Position.getY()
 
-  if (keyAction(e, 'move')) {
+  if (e.shiftKey) {
+    if (keyAction(e, 'fixed') === 'develop') {
+      Game.setDevelop()
+    }
+  } else if (keyAction(e, 'move')) {
     Game.system.move(keyAction(e, 'move'))
   } else if (keyAction(e, 'fixed') === 'space') {
     Game.system.pickUp(x, y)

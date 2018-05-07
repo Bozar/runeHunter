@@ -65,18 +65,28 @@ Game.system.pcAct = function () {
 }
 
 Game.system.harbingerAct = function () {
+  let message = Game.getEntity('message').Message
+  let unlock = true
+
   Game.getEntity('timer').engine.lock()
 
   switch (Game.getEntity('harbinger').Counter.countdown()) {
     case 'warning':
-      console.log('10 turns left')
+      message.pushMsg(Game.text.encounter('warn'))
       break
     case 'ghost':
-      console.log('ghost appears')
+      if (Game.system.isDead()) {
+        message.pushMsg(Game.text.encounter('dead'))
+        message.pushMsg(Game.text.encounter('end'))
+
+        unlock = false
+      } else {
+        message.pushMsg(Game.text.encounter('appear'))
+      }
       break
   }
 
-  Game.system.unlockEngine(1)
+  unlock && Game.system.unlockEngine(1)
 }
 
 Game.system.move = function (direction) {
@@ -111,7 +121,8 @@ Game.system.move = function (direction) {
     Game.input.listenEvent('remove', 'main')
     Game.system.unlockEngine(duration)
   } else {
-    console.log('you cannot move there')
+    Game.getEntity('message').Message.setModeline(
+      Game.text.interact('forbidMove'))
   }
 }
 
@@ -174,4 +185,12 @@ Game.system.drop = function (item) {
 
     return true
   }
+}
+
+Game.system.isDead = function () {
+  let hasSkull = Game.getEntity('pc').Bagpack.getSkull() > 0
+  let hasCoin = Game.getEntity('pc').Bagpack.getCoin() > 1
+  let hasGem = Game.getEntity('pc').Bagpack.getGem() > 0
+
+  return !(hasSkull || hasCoin || hasGem)
 }
