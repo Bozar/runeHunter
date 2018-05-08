@@ -28,6 +28,13 @@ Game.system.isPC = function (actor) {
   return actor.getID() === Game.getEntity('pc').getID()
 }
 
+Game.system.pcHere = function (x, y) {
+  let pcX = Game.getEntity('pc').Position.getX()
+  let pcY = Game.getEntity('pc').Position.getY()
+
+  return (x === pcX) && (y === pcY)
+}
+
 Game.system.isAltar = function (x, y) {
   return false
 }
@@ -58,7 +65,7 @@ Game.system.pcAct = function () {
 
     if (item) {
       if (bag.dropItem(item, true)) {
-        message.pushMsg(Game.text.encounter('lure', item))
+        message.pushMsg(Game.text.interact('drop', item))
         message.pushMsg(Game.text.encounter('reaction', item))
 
         Game.input.listenEvent('remove', lure)
@@ -211,4 +218,31 @@ Game.system.resetHarbinger = function (item) {
   Game.getEntity('harbinger').Counter.reset(item)
   Game.getEntity('harbinger').Position.setX(null)
   Game.getEntity('harbinger').Position.setY(null)
+}
+
+Game.system.initialItem = function () {
+  let maxSkull = 18
+  let maxCoin = 4 + Math.floor(ROT.RNG.getUniform() * 5)
+  let x = null
+  let y = null
+
+  let width = Game.getEntity('dungeon').Dungeon.getWidth()
+  let height = Game.getEntity('dungeon').Dungeon.getHeight()
+
+  for (let i = 0; i < maxSkull; i++) {
+    Game.entity.skull.apply(null, findPosition())
+  }
+  for (let i = 0; i < maxCoin; i++) {
+    Game.entity.coin.apply(null, findPosition())
+  }
+
+  function findPosition () {
+    do {
+      x = Math.floor(ROT.RNG.getUniform() * width)
+      y = Math.floor(ROT.RNG.getUniform() * height)
+    } while (!Game.system.isFloor(x, y) ||
+    Game.system.isItem(x, y) || Game.system.pcHere(x, y))
+
+    return [x, y]
+  }
 }

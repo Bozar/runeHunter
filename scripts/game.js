@@ -35,6 +35,7 @@ Game.input.keybind.get('fixed').set('space', [' '])
 Game.input.keybind.get('fixed').set('enter', ['Enter'])
 Game.input.keybind.get('fixed').set('esc', ['Escape'])
 Game.input.keybind.get('fixed').set('develop', ['~'])
+Game.input.keybind.get('fixed').set('fog', ['\\'])
 
 // movement
 Game.input.keybind.set('move', new Map())
@@ -253,8 +254,11 @@ Game.screens.drawStatus = function () {
   let hasList = [pc.getSkull(), pc.getCoin(), pc.getGem(), pc.getRune()]
   let needList = [needSkull, needCoin, needGem, needRune]
 
-  let uiList = [Game.text.ui('skull'), Game.text.ui('coin'),
-    Game.text.ui('gem'), Game.text.ui('rune')]
+  let uiList = []
+  uiList.push(Game.text.ui('skull'))
+  uiList.push(Game.text.ui('coin'))
+  uiList.push(Game.text.ui('gem'))
+  uiList.push(Game.text.ui('rune'))
 
   let colorList = []
   for (let i = 0; i < needList.length; i++) {
@@ -432,6 +436,8 @@ Game.screens.main.initialize = function () {
   Game.getEntity('timer').scheduler.add(Game.getEntity('harbinger'), true)
   Game.getEntity('timer').engine.start()
 
+  Game.system.initialItem()
+
   Game.getEntity('message').Message.getMsgList().push(
     'hello world')
   Game.getEntity('message').Message.getMsgList().push(
@@ -487,17 +493,21 @@ Game.screens.main.keyInput = function (e) {
     Game.system.pickUp(x, y)
   } else if (keyAction(e, 'drop')) {
     Game.system.drop(keyAction(e, 'drop'))
-  } else if (e.key === '0') {
-    console.log(Game.getEntity('timer').scheduler.getTime())
-  } else if (e.key === '4') {
-    Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
-      Game.getEntity('pc').Position.getY())
-  } else if (e.key === '5') {
-    Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
-      Game.getEntity('pc').Position.getY())
-  } else if (e.key === '6') {
-    Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
-      Game.getEntity('pc').Position.getY())
+  } else if (Game.getDevelop()) {
+    if (keyAction(e, 'fixed') === 'fog') {
+      Game.getEntity('dungeon').Dungeon.setFov()
+    } else if (e.key === '0') {
+      console.log(Game.getEntity('timer').scheduler.getTime())
+    } else if (e.key === '4') {
+      Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
+        Game.getEntity('pc').Position.getY())
+    } else if (e.key === '5') {
+      Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
+        Game.getEntity('pc').Position.getY())
+    } else if (e.key === '6') {
+      Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
+        Game.getEntity('pc').Position.getY())
+    }
   }
 
   Game.display.clear()
