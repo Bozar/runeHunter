@@ -102,6 +102,9 @@ Game.system.harbingerAct = function () {
         unlock = false
       } else {
         message.pushMsg(Game.text.encounter('appear'))
+
+        !Game.getEntity('altar').Sacrifice.getDrawAltar() &&
+          Game.system.placeAltar()
       }
       break
   }
@@ -132,26 +135,29 @@ Game.system.move = function (direction) {
   }
 
   if (Game.system.isFloor(x, y) && !Game.system.isAltar(x, y)) {
-    actor.Position.setX(x)
-    actor.Position.setY(y)
-
     Game.system.isItem(x, y) &&
       message.pushMsg(Game.text.interact('find',
         Game.system.isItem(x, y).getEntityName()))
+
+    actor.Position.setX(x)
+    actor.Position.setY(y)
 
     Game.input.listenEvent('remove', 'main')
     Game.system.unlockEngine(duration)
   } else if (Game.system.isAltar(x, y)) {
     if (Game.system.sacrificeItem()) {
-      actor.Bagpack.pickItem('rune')
       message.pushMsg(Game.text.altar('sacrifice'))
       message.pushMsg(Game.text.altar('reaction',
         Game.getEntity('altar').Sacrifice.getAltarName()))
+
+      actor.Bagpack.pickItem('rune')
       Game.getEntity('altar').Sacrifice.nextAltar()
+      Game.system.resetAltar()
       if (actor.Bagpack.getRune() === 3) {
         message.pushMsg(Game.text.altar('win'))
         message.pushMsg(Game.text.altar('turn'))
         message.pushMsg(Game.text.encounter('end'))
+
         Game.input.listenEvent('remove', 'main')
       } else {
         Game.input.listenEvent('remove', 'main')
@@ -240,7 +246,7 @@ Game.system.resetHarbinger = function (item) {
   Game.getEntity('harbinger').Position.setY(null)
 }
 
-Game.system.initialItem = function () {
+Game.system.placeItem = function () {
   let maxSkull = 18
   let maxCoin = 4 + Math.floor(ROT.RNG.getUniform() * 5)
   let x = null
@@ -267,6 +273,28 @@ Game.system.initialItem = function () {
   }
 }
 
+Game.system.placeAltar = function () {
+  let altar = Game.getEntity('altar')
+  let pcX = Game.getEntity('pc').Position.getX()
+  let width = Game.getEntity('dungeon').Dungeon.getWidth()
+  let height = Game.getEntity('dungeon').Dungeon.getHeight()
+
+  let x = null
+  let y = null
+
+  do {
+    x = Math.floor(width * ROT.RNG.getUniform())
+    y = Math.floor(height * ROT.RNG.getUniform())
+  } while (!Game.system.isFloor(x, y) || Game.system.isItem(x, y) ||
+  !Game.system.isReachable(x, y) ||
+  x < 0 || x >= width || Math.abs(x - pcX) < Math.floor(width / 3) ||
+  y < 0 || y >= height)
+
+  altar.Position.setX(x)
+  altar.Position.setY(y)
+  altar.Sacrifice.drawAlatr(true)
+}
+
 Game.system.sacrificeItem = function () {
   let needItem = Game.getEntity('altar').Sacrifice.getItemList()
   let bag = Game.getEntity('pc').Bagpack
@@ -286,4 +314,23 @@ Game.system.sacrificeItem = function () {
     return true
   }
   return false
+}
+
+Game.system.isReachable = function (x, y) {
+  let surround = [[x - 1, y - 1], [x - 1, y], [x - 1, y + 1],
+  [x, y - 1], [x, y + 1],
+  [x + 1, y - 1], [x + 1, y], [x + 1, y + 1]]
+
+  for (let i = 0; i < surround.length; i++) {
+    if (!Game.system.isFloor(...surround[i])) {
+      return false
+    }
+  }
+  return true
+}
+
+Game.system.resetAltar = function () {
+  Game.getEntity('altar').Sacrifice.drawAlatr(false)
+  Game.getEntity('altar').Position.setX(null)
+  Game.getEntity('altar').Position.setY(null)
 }

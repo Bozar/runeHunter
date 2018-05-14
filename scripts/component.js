@@ -183,5 +183,5 @@ Game.Component.Sacrifice = function () {
   this.nextAltar = function () {
     this._counter = Math.min(this._counter + 1, this._altarList.length - 1)
   }
-  this.setDrawAlatr = function (needDraw) { this._draw = needDraw }
+  this.drawAlatr = function (status) { this._draw = status }
 }

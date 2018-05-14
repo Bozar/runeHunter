@@ -432,7 +432,7 @@ Game.screens.main.initialize = function () {
   Game.getEntity('timer').engine.start()
 
   Game.system.placePC()
-  Game.system.initialItem()
+  Game.system.placeItem()
 
   Game.getEntity('message').Message.getMsgList().push(
     'hello world')
@@ -506,9 +506,7 @@ Game.screens.main.keyInput = function (e) {
       Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
         Game.getEntity('pc').Position.getY())
     } else if (e.key === '7') {
-      Game.getEntity('altar').Position.setX(Game.getEntity('pc').Position.getX() - 1)
-      Game.getEntity('altar').Position.setY(Game.getEntity('pc').Position.getY())
-      Game.getEntity('altar').Sacrifice.setDrawAlatr(true)
+      Game.system.placeAltar()
     }
   }
 
