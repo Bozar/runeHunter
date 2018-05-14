@@ -244,15 +244,10 @@ Game.screens.drawStatus = function () {
   let pc = Game.getEntity('pc').Bagpack
   let turn = pc.getSpeed()
   let carry = pc.getTotal()
-  let altar = 'Death'
-
-  let needSkull = 1
-  let needCoin = 2
-  let needGem = 3
-  let needRune = 3
+  let altar = Game.text.ui(Game.getEntity('altar').Sacrifice.getAltarName())
 
   let hasList = [pc.getSkull(), pc.getCoin(), pc.getGem(), pc.getRune()]
-  let needList = [needSkull, needCoin, needGem, needRune]
+  let needList = Game.getEntity('altar').Sacrifice.getItemList()
 
   let uiList = []
   uiList.push(Game.text.ui('skull'))
@@ -428,14 +423,15 @@ Game.screens.main.initialize = function () {
   Game.entity.message()
 
   Game.entity.pc()
-  Game.system.placePC()
   Game.entity.harbinger()
+  Game.entity.altar()
 
   Game.entity.timer()
   Game.getEntity('timer').scheduler.add(Game.getEntity('pc'), true)
   Game.getEntity('timer').scheduler.add(Game.getEntity('harbinger'), true)
   Game.getEntity('timer').engine.start()
 
+  Game.system.placePC()
   Game.system.initialItem()
 
   Game.getEntity('message').Message.getMsgList().push(
@@ -476,6 +472,8 @@ Game.screens.main.display = function () {
   Game.screens.drawModeLine()
 
   Game.getEntity('harbinger').Counter.hasGhost() && Game.screens.drawGhost()
+  Game.getEntity('altar').Sacrifice.getDrawAltar() &&
+    Game.screens.drawActor(Game.getEntity('altar'), true)
 }
 
 Game.screens.main.keyInput = function (e) {
@@ -507,6 +505,10 @@ Game.screens.main.keyInput = function (e) {
     } else if (e.key === '6') {
       Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
         Game.getEntity('pc').Position.getY())
+    } else if (e.key === '7') {
+      Game.getEntity('altar').Position.setX(Game.getEntity('pc').Position.getX() - 1)
+      Game.getEntity('altar').Position.setY(Game.getEntity('pc').Position.getY())
+      Game.getEntity('altar').Sacrifice.setDrawAlatr(true)
     }
   }
 

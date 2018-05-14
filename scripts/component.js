@@ -92,6 +92,7 @@ Game.Component.Counter = function () {
   this._count = this._start
 
   this.hasGhost = function () { return this._count <= 0 }
+  this.hasWarning = function () { return this._count <= this._warning }
 
   this.countdown = function () {
     this._count -= 1
@@ -161,4 +162,26 @@ Game.Component.Bagpack = function () {
       return false
     }
   }
+}
+
+Game.Component.Sacrifice = function () {
+  this._name = 'Sacrifice'
+
+  // skull, coin, gem
+  this._death = [3, 2, 1]
+  this._trick = [2, 2, 2]
+  this._greed = [1, 2, 3]
+
+  this._altarList = ['death', 'trick', 'greed']
+  this._counter = 0
+  this._draw = false
+
+  this.getAltarName = function () { return this._altarList[this._counter] }
+  this.getItemList = function () { return this['_' + this.getAltarName()] }
+  this.getDrawAltar = function () { return this._draw }
+
+  this.nextAltar = function () {
+    this._counter = Math.min(this._counter + 1, this._altarList.length - 1)
+  }
+  this.setDrawAlatr = function (needDraw) { this._draw = needDraw }
 }

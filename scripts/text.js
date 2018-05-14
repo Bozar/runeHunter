@@ -12,6 +12,9 @@ Game.text.ui = function (id) {
   text.set('coin', 'Coin:')
   text.set('gem', 'Gem:')
   text.set('rune', 'Rune:')
+  text.set('death', 'Death')
+  text.set('trick', 'Trick')
+  text.set('greed', 'Greed')
 
   return text.get(id)
 }
@@ -47,11 +50,11 @@ Game.text.encounter = function (id, item) {
   let text = new Map()
 
   text.set('warn', 'Something bad is going to happen.')
-  text.set('dead', 'You are caught by the ghost.')
+  text.set('lose', 'You are caught by the ghost.')
   text.set('appear', 'The ghost appears from nowhere!')
   text.set('invalid', 'You need to drop some treasure.')
   text.set('end', '===The End===')
-  text.set('more', 'You need more ' + item + 's.')
+  text.set('more', 'You need more treasure.')
   text.set('reaction', 'The ghost vanishes' + getReaction(item))
 
   return text.get(id)
@@ -66,4 +69,28 @@ Game.text.encounter = function (id, item) {
         return '.'
     }
   }
+}
+
+// make sacrifice to the god
+Game.text.altar = function (id, item) {
+  let text = new Map()
+
+  text.set('win', 'You leave the dungeon alive with 3 runes!')
+  text.set('turn', 'Final turn: ' + getTurn())
+  text.set('sacrifice', 'You make a sacrifice.')
+  text.set('reaction', getReaction(item))
+
+  function getTurn () {
+    return Math.floor(Game.getEntity('timer').scheduler.getTime())
+  }
+
+  function getReaction (item) {
+    let god = new Map()
+    god.set('death', 'The God of Death is indifferent to you.')
+    god.set('trick', 'The God of Trickery whispers to you.')
+    god.set('greed', 'The God of Greed smiles to you.')
+
+    return god.get(item)
+  }
+  return text.get(id)
 }

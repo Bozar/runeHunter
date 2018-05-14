@@ -9,6 +9,7 @@ Game.entities.set('pc', null)
 Game.entities.set('timer', null)
 Game.entities.set('harbinger', null)
 Game.entities.set('item', new Map())
+Game.entities.set('altar', null)
 
 // ----- Create a single entity +++++
 Game.entity = {}
@@ -111,4 +112,14 @@ Game.entity.gem = function (x, y) {
   e.addComponent(new Game.Component.Display('*'))
 
   Game.entities.get('item').set(e.getID(), e)
+}
+
+Game.entity.altar = function () {
+  let e = new Game.Factory('altar')
+
+  e.addComponent(new Game.Component.Position(5))
+  e.addComponent(new Game.Component.Display('A', 'orange'))
+  e.addComponent(new Game.Component.Sacrifice())
+
+  Game.entities.set('altar', e)
 }

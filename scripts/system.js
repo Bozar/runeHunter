@@ -36,7 +36,8 @@ Game.system.pcHere = function (x, y) {
 }
 
 Game.system.isAltar = function (x, y) {
-  return false
+  return x === Game.getEntity('altar').Position.getX() &&
+    y === Game.getEntity('altar').Position.getY()
 }
 
 Game.system.isItem = function (x, y) {
@@ -72,7 +73,7 @@ Game.system.pcAct = function () {
         Game.system.resetHarbinger(item)
         Game.system.unlockEngine(1)
       } else {
-        message.setModeline(Game.text.encounter('more', item))
+        message.setModeline(Game.text.encounter('more'))
       }
     } else {
       message.setModeline(Game.text.encounter('invalid'))
@@ -95,7 +96,7 @@ Game.system.harbingerAct = function () {
       break
     case 'ghost':
       if (Game.system.isDead()) {
-        message.pushMsg(Game.text.encounter('dead'))
+        message.pushMsg(Game.text.encounter('lose'))
         message.pushMsg(Game.text.encounter('end'))
 
         unlock = false
@@ -113,6 +114,7 @@ Game.system.move = function (direction) {
   let duration = actor.Bagpack.getSpeed()
   let x = actor.Position.getX()
   let y = actor.Position.getY()
+  let message = Game.getEntity('message').Message
 
   switch (direction) {
     case 'left':
@@ -134,14 +136,32 @@ Game.system.move = function (direction) {
     actor.Position.setY(y)
 
     Game.system.isItem(x, y) &&
-      Game.getEntity('message').Message.pushMsg(
-        Game.text.interact('find', Game.system.isItem(x, y).getEntityName()))
+      message.pushMsg(Game.text.interact('find',
+        Game.system.isItem(x, y).getEntityName()))
 
     Game.input.listenEvent('remove', 'main')
     Game.system.unlockEngine(duration)
+  } else if (Game.system.isAltar(x, y)) {
+    if (Game.system.sacrificeItem()) {
+      actor.Bagpack.pickItem('rune')
+      message.pushMsg(Game.text.altar('sacrifice'))
+      message.pushMsg(Game.text.altar('reaction',
+        Game.getEntity('altar').Sacrifice.getAltarName()))
+      Game.getEntity('altar').Sacrifice.nextAltar()
+      if (actor.Bagpack.getRune() === 3) {
+        message.pushMsg(Game.text.altar('win'))
+        message.pushMsg(Game.text.altar('turn'))
+        message.pushMsg(Game.text.encounter('end'))
+        Game.input.listenEvent('remove', 'main')
+      } else {
+        Game.input.listenEvent('remove', 'main')
+        Game.system.unlockEngine(1)
+      }
+    } else {
+      message.setModeline(Game.text.encounter('more'))
+    }
   } else {
-    Game.getEntity('message').Message.setModeline(
-      Game.text.interact('forbidMove'))
+    message.setModeline(Game.text.interact('forbidMove'))
   }
 }
 
@@ -245,4 +265,25 @@ Game.system.initialItem = function () {
 
     return [x, y]
   }
+}
+
+Game.system.sacrificeItem = function () {
+  let needItem = Game.getEntity('altar').Sacrifice.getItemList()
+  let bag = Game.getEntity('pc').Bagpack
+  let hasItem = bag.getSkull() >= needItem[0] &&
+    bag.getCoin() >= needItem[1] &&
+    bag.getGem() >= needItem[2]
+
+  if (hasItem) {
+    for (let i = 0; i < needItem[0]; i++) {
+      bag.dropItem('skull')
+    }
+    for (let i = 0; i < needItem[1]; i++) {
+      bag.dropItem('coin')
+    } for (let i = 0; i < needItem[2]; i++) {
+      bag.dropItem('gem')
+    }
+    return true
+  }
+  return false
 }
