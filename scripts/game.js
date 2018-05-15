@@ -2,8 +2,8 @@
 
 // ----- Version number, development switch, seed & color +++++
 var Game = {}
-Game._version = '0.0.1-?'
-Game._develop = true
+Game._version = '0.1.0'
+Game._develop = false
 Game.getVersion = function () { return this._version }
 Game.getDevelop = function () { return this._develop }
 Game.setDevelop = function () { this._develop = !this._develop }
@@ -439,15 +439,15 @@ Game.screens.main.initialize = function () {
   Game.system.placeItem()
 
   Game.getEntity('message').Message.getMsgList().push(
-    'Press arrow keys or hjkl to move around.')
+    Game.text.tutorial('move'))
   Game.getEntity('message').Message.getMsgList().push(
-    'Press s/c/g to drop skull/coin/gem.')
+    Game.text.tutorial('drop'))
   Game.getEntity('message').Message.getMsgList().push(
-    'Press Space to confirm or pick up.')
+    Game.text.tutorial('pick'))
   Game.getEntity('message').Message.getMsgList().push(
-    'Your speed (turn) is slowed down by the carry weight.')
+    Game.text.tutorial('speed'))
   Game.getEntity('message').Message.getMsgList().push(
-    'Make sacrifice at the Altar to get a rune.')
+    Game.text.tutorial('altar'))
 }
 
 Game.screens.main.display = function () {

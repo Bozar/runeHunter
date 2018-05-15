@@ -94,3 +94,15 @@ Game.text.altar = function (id, item) {
   }
   return text.get(id)
 }
+
+Game.text.tutorial = function (id) {
+  let text = new Map()
+
+  text.set('move', 'Press arrow keys or hjkl to move around.')
+  text.set('drop', 'Press s/c/g to drop the skull/coin/gem.')
+  text.set('pick', 'Press Space to pick up.')
+  text.set('speed', 'Your speed (turn) is slowed down by the carry weight.')
+  text.set('altar', 'Make sacrifice at the Altar to get a rune.')
+
+  return text.get(id)
+}
