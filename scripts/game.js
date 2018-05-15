@@ -35,7 +35,13 @@ Game.input.keybind.get('fixed').set('space', [' '])
 Game.input.keybind.get('fixed').set('enter', ['Enter'])
 Game.input.keybind.get('fixed').set('esc', ['Escape'])
 Game.input.keybind.get('fixed').set('develop', ['~'])
-Game.input.keybind.get('fixed').set('seed', ['p'])
+Game.input.keybind.get('fixed').set('seed', ['d'])
+Game.input.keybind.get('fixed').set('turn', ['t'])
+Game.input.keybind.get('fixed').set('fog', ['f'])
+Game.input.keybind.get('fixed').set('skull', ['S'])
+Game.input.keybind.get('fixed').set('coin', ['C'])
+Game.input.keybind.get('fixed').set('gem', ['G'])
+Game.input.keybind.get('fixed').set('altar', ['A'])
 
 // movement
 Game.input.keybind.set('move', new Map())
@@ -441,9 +447,9 @@ Game.screens.main.initialize = function () {
   Game.getEntity('message').Message.getMsgList().push(
     Game.text.tutorial('move'))
   Game.getEntity('message').Message.getMsgList().push(
-    Game.text.tutorial('drop'))
+      Game.text.tutorial('pick'))
   Game.getEntity('message').Message.getMsgList().push(
-    Game.text.tutorial('pick'))
+    Game.text.tutorial('drop'))
   Game.getEntity('message').Message.getMsgList().push(
     Game.text.tutorial('speed'))
   Game.getEntity('message').Message.getMsgList().push(
@@ -478,20 +484,20 @@ Game.screens.main.keyInput = function (e) {
       Game.setDevelop()
     }
     if (Game.getDevelop()) {
-      switch (e.key) {
-        case '?':
+      switch (keyAction(e, 'fixed')) {
+        case 'skull':
           Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
             Game.getEntity('pc').Position.getY())
           break
-        case '$':
+        case 'coin':
           Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
             Game.getEntity('pc').Position.getY())
           break
-        case '*':
+        case 'gem':
           Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
             Game.getEntity('pc').Position.getY())
           break
-        case 'A':
+        case 'altar':
           Game.system.placeAltar()
           Game.system.placeItem(Game.system.placeFog())
           break
@@ -506,11 +512,11 @@ Game.screens.main.keyInput = function (e) {
   } else if (keyAction(e, 'fixed') === 'seed') {
     console.log(Game.getEntity('seed').Seed.getSeed())
   } else if (Game.getDevelop()) {
-    switch (e.key) {
-      case 't':
+    switch (keyAction(e, 'fixed')) {
+      case 'turn':
         console.log(Game.getEntity('timer').scheduler.getTime())
         break
-      case 'v':
+      case 'fog':
         Game.getEntity('dungeon').Dungeon.setFov()
         break
     }
