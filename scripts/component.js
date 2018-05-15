@@ -57,6 +57,7 @@ Game.Component.Dungeon = function () {
   this.getFov = function () { return this._hasFov }
 
   this.setFov = function () { this._hasFov = !this._hasFov }
+  this.setMemory = function (memory) { this._memory = memory }
 }
 
 Game.Component.Display = function (char, color) {

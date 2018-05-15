@@ -10,6 +10,7 @@ Game.entities.set('timer', null)
 Game.entities.set('harbinger', null)
 Game.entities.set('item', new Map())
 Game.entities.set('altar', null)
+Game.entities.set('fog', null)
 
 // ----- Create a single entity +++++
 Game.entity = {}
@@ -117,9 +118,16 @@ Game.entity.gem = function (x, y) {
 Game.entity.altar = function () {
   let e = new Game.Factory('altar')
 
-  e.addComponent(new Game.Component.Position(5))
+  e.addComponent(new Game.Component.Position())
   e.addComponent(new Game.Component.Display('A', 'orange'))
   e.addComponent(new Game.Component.Sacrifice())
 
   Game.entities.set('altar', e)
+}
+
+Game.entity.fog = function () {
+  let e = new Game.Factory('fog')
+  e.addComponent(new Game.Component.Position(8))
+
+  Game.entities.set('fog', e)
 }

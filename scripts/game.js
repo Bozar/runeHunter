@@ -35,7 +35,7 @@ Game.input.keybind.get('fixed').set('space', [' '])
 Game.input.keybind.get('fixed').set('enter', ['Enter'])
 Game.input.keybind.get('fixed').set('esc', ['Escape'])
 Game.input.keybind.get('fixed').set('develop', ['~'])
-Game.input.keybind.get('fixed').set('fog', ['\\'])
+Game.input.keybind.get('fixed').set('seed', ['p'])
 
 // movement
 Game.input.keybind.set('move', new Map())
@@ -396,10 +396,13 @@ Game.screens.drawGhost = function () {
 
   let drawHere = []
   let position = null
+  let verify = false
 
   if (!(harbinger.Position.getX() && harbinger.Position.getY())) {
     dungeon.fov.compute(pcX, pcY, sight, function (x, y) {
-      if (x !== pcX && y !== pcY && Game.system.isFloor(x, y)) {
+      verify = (x !== pcX && y !== pcY &&
+        Game.system.isFloor(x, y) && !Game.system.isAltar(x, y))
+      if (verify) {
         drawHere.push(x + ',' + y)
       }
     })
@@ -425,6 +428,7 @@ Game.screens.main.initialize = function () {
   Game.entity.pc()
   Game.entity.harbinger()
   Game.entity.altar()
+  Game.entity.fog()
 
   Game.entity.timer()
   Game.getEntity('timer').scheduler.add(Game.getEntity('pc'), true)
@@ -435,27 +439,15 @@ Game.screens.main.initialize = function () {
   Game.system.placeItem()
 
   Game.getEntity('message').Message.getMsgList().push(
-    'hello world')
-  Game.getEntity('message').Message.getMsgList().push(
-    'welcome to the dungeon')
-  Game.getEntity('message').Message.getMsgList().push(
-    'You cannot drop the treasure here.')
-  Game.getEntity('message').Message.getMsgList().push(
-    'You drop the Alluring Skull.')
-  Game.getEntity('message').Message.getMsgList().push(
-    'You drop the Red Stone of Aja.')
-  Game.getEntity('message').Message.getMsgList().push(
-    'You pick up the Red Stone of Aja.')
-  Game.getEntity('message').Message.getMsgList().push(
-    'You find the Double-Headed Coin.')
-  Game.getEntity('message').Message.getMsgList().push(
     'Press arrow keys or hjkl to move around.')
   Game.getEntity('message').Message.getMsgList().push(
-    'Press Space to confirm, Esc to cancel.')
+    'Press s/c/g to drop skull/coin/gem.')
   Game.getEntity('message').Message.getMsgList().push(
-    '[T] You have 10 turns before the ghost appears.')
+    'Press Space to confirm or pick up.')
   Game.getEntity('message').Message.getMsgList().push(
-    '[T] Try to carry more items and stick to the wall.')
+    'Your speed (turn) is slowed down by the carry weight.')
+  Game.getEntity('message').Message.getMsgList().push(
+    'Make sacrifice at the Altar to get a rune.')
 }
 
 Game.screens.main.display = function () {
@@ -485,28 +477,42 @@ Game.screens.main.keyInput = function (e) {
     if (keyAction(e, 'fixed') === 'develop') {
       Game.setDevelop()
     }
+    if (Game.getDevelop()) {
+      switch (e.key) {
+        case '?':
+          Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
+            Game.getEntity('pc').Position.getY())
+          break
+        case '$':
+          Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
+            Game.getEntity('pc').Position.getY())
+          break
+        case '*':
+          Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
+            Game.getEntity('pc').Position.getY())
+          break
+        case 'A':
+          Game.system.placeAltar()
+          Game.system.placeItem(Game.system.placeFog())
+          break
+      }
+    }
   } else if (keyAction(e, 'move')) {
     Game.system.move(keyAction(e, 'move'))
   } else if (keyAction(e, 'fixed') === 'space') {
     Game.system.pickUp(x, y)
   } else if (keyAction(e, 'drop')) {
     Game.system.drop(keyAction(e, 'drop'))
+  } else if (keyAction(e, 'fixed') === 'seed') {
+    console.log(Game.getEntity('seed').Seed.getSeed())
   } else if (Game.getDevelop()) {
-    if (keyAction(e, 'fixed') === 'fog') {
-      Game.getEntity('dungeon').Dungeon.setFov()
-    } else if (e.key === '0') {
-      console.log(Game.getEntity('timer').scheduler.getTime())
-    } else if (e.key === '4') {
-      Game.entity.skull(Game.getEntity('pc').Position.getX() - 1,
-        Game.getEntity('pc').Position.getY())
-    } else if (e.key === '5') {
-      Game.entity.coin(Game.getEntity('pc').Position.getX() - 1,
-        Game.getEntity('pc').Position.getY())
-    } else if (e.key === '6') {
-      Game.entity.gem(Game.getEntity('pc').Position.getX() - 1,
-        Game.getEntity('pc').Position.getY())
-    } else if (e.key === '7') {
-      Game.system.placeAltar()
+    switch (e.key) {
+      case 't':
+        console.log(Game.getEntity('timer').scheduler.getTime())
+        break
+      case 'v':
+        Game.getEntity('dungeon').Dungeon.setFov()
+        break
     }
   }
 

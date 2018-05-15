@@ -103,8 +103,12 @@ Game.system.harbingerAct = function () {
       } else {
         message.pushMsg(Game.text.encounter('appear'))
 
-        !Game.getEntity('altar').Sacrifice.getDrawAltar() &&
-          Game.system.placeAltar()
+        if (!Game.getEntity('altar').Sacrifice.getDrawAltar()) {
+          Game.system.placeAltar(false)
+        } else {
+          Game.system.placeAltar(true)
+        }
+        Game.system.placeItem(Game.system.placeFog())
       }
       break
   }
@@ -246,9 +250,12 @@ Game.system.resetHarbinger = function (item) {
   Game.getEntity('harbinger').Position.setY(null)
 }
 
-Game.system.placeItem = function () {
-  let maxSkull = 18
-  let maxCoin = 4 + Math.floor(ROT.RNG.getUniform() * 5)
+Game.system.placeItem = function (emptyFloor) {
+  let maxSkull = !emptyFloor ? 18 : skullInFog()
+  let maxCoin = !emptyFloor
+    ? 4 + Math.floor(ROT.RNG.getUniform() * 5)
+    : coinInFog()
+  let maxGem = !emptyFloor ? 0 : gemInFog()
   let x = null
   let y = null
 
@@ -261,20 +268,42 @@ Game.system.placeItem = function () {
   for (let i = 0; i < maxCoin; i++) {
     Game.entity.coin.apply(null, findPosition())
   }
+  for (let i = 0; i < maxGem; i++) {
+    Game.entity.gem.apply(null, findPosition())
+  }
 
   function findPosition () {
+    let maxTry = 99
     do {
-      x = Math.floor(ROT.RNG.getUniform() * width)
-      y = Math.floor(ROT.RNG.getUniform() * height)
-    } while (!Game.system.isFloor(x, y) ||
-    Game.system.isItem(x, y) || Game.system.pcHere(x, y))
+      if (!emptyFloor) {
+        x = Math.floor(ROT.RNG.getUniform() * width)
+        y = Math.floor(ROT.RNG.getUniform() * height)
+      } else {
+        x = emptyFloor[Math.floor(ROT.RNG.getUniform() * emptyFloor.length)]
+        y = Number.parseInt(x.split(',')[1], 10)
+        x = Number.parseInt(x.split(',')[0], 10)
+      }
+      maxTry--
+    } while (!Game.system.isFloor(x, y) || Game.system.isAltar(x, y) ||
+    Game.system.isItem(x, y) || Game.system.pcHere(x, y) || maxTry > 0)
 
     return [x, y]
   }
+
+  function gemInFog () {
+    return Math.max(1, Math.floor(ROT.RNG.getUniform() * 3))
+  }
+  function coinInFog () {
+    return Math.floor(ROT.RNG.getUniform() * 3 + 2)
+  }
+  function skullInFog () {
+    return Math.floor(ROT.RNG.getUniform() * 5 + 4)
+  }
 }
 
-Game.system.placeAltar = function () {
+Game.system.placeAltar = function (isFog) {
   let altar = Game.getEntity('altar')
+  let fog = Game.getEntity('fog')
   let pcX = Game.getEntity('pc').Position.getX()
   let width = Game.getEntity('dungeon').Dungeon.getWidth()
   let height = Game.getEntity('dungeon').Dungeon.getHeight()
@@ -290,8 +319,12 @@ Game.system.placeAltar = function () {
   x < 0 || x >= width || Math.abs(x - pcX) < Math.floor(width / 3) ||
   y < 0 || y >= height)
 
-  altar.Position.setX(x)
-  altar.Position.setY(y)
+  if (!isFog) {
+    altar.Position.setX(x)
+    altar.Position.setY(y)
+  }
+  fog.Position.setX(x)
+  fog.Position.setY(y)
   altar.Sacrifice.drawAlatr(true)
 }
 
@@ -333,4 +366,27 @@ Game.system.resetAltar = function () {
   Game.getEntity('altar').Sacrifice.drawAlatr(false)
   Game.getEntity('altar').Position.setX(null)
   Game.getEntity('altar').Position.setY(null)
+}
+
+Game.system.placeFog = function () {
+  let centerX = Game.getEntity('fog').Position.getX()
+  let centerY = Game.getEntity('fog').Position.getY()
+  let sight = Game.getEntity('fog').Position.getSight()
+  let dungeon = Game.getEntity('dungeon')
+  let fog = []
+  let memory = null
+
+  dungeon.fov.compute(centerX, centerY, sight, function (x, y) {
+    Game.system.isItem(x, y) &&
+      Game.getEntity('item').delete(Game.system.isItem(x, y).getID())
+
+    memory = dungeon.Dungeon.getMemory().filter((i) => {
+      return i !== x + ',' + y
+    })
+    dungeon.Dungeon.setMemory(memory)
+
+    fog.push(x + ',' + y)
+  })
+
+  return fog
 }
