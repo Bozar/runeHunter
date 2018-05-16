@@ -4,6 +4,8 @@
 
 Rune Hunter is a coffee break Roguelike game written in Javascript with [rot.js](https://github.com/ondras/rot.js). Explore the dungeon, stay away from ghosts, and collect 3 runes as quickly as possible.
 
+Play the game [on-line](https://bozar.github.io/runeHunter/).
+
 ## Your Goal
 
 * Explore the dungeon and collect treasure.
